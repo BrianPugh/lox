@@ -3,7 +3,7 @@ from lox import OneWriterManyReader
 from copy import copy
 from time import sleep, time
 
-SLEEP_TIME = 1.5
+SLEEP_TIME = 0.01
 N_WORKERS = 5
 
 rw_lock = None

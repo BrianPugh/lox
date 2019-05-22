@@ -2,7 +2,7 @@
 """
 import threading
 from contextlib import contextmanager
-from lox.lock.CountingLock import CountingLock
+from lox.lock.LightSwitch import LightSwitch
 
 __all__ = ["OneWriterManyReader",]
 
@@ -16,8 +16,8 @@ class OneWriterManyReader:
     def __init__(self):
         self._no_writers    = threading.Lock()
         self._no_readers    = threading.Lock()
-        self._read_counter  = CountingLock(self._no_writers)
-        self._write_counter = CountingLock(self._no_readers)
+        self._read_counter  = LightSwitch(self._no_writers)
+        self._write_counter = LightSwitch(self._no_readers)
         self._readers_queue = threading.Lock()
 
     @contextmanager

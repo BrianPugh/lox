@@ -1,9 +1,9 @@
 import threading
-from lox import CountingLock
+from lox import LightSwitch
 from copy import copy
 from time import sleep, time
 
-SLEEP_TIME = 1.5
+SLEEP_TIME = 0.01
 N_WORKERS = 5
 
 common_lock = None
@@ -15,10 +15,10 @@ def common_setup():
     global common_lock, counting_lock, resp_lock
 
     common_lock = threading.Lock()
-    counting_lock = CountingLock(common_lock)
+    counting_lock = LightSwitch(common_lock)
     resp_lock = threading.Lock()
 
-def test_CountingLock_1():
+def test_LightSwitch_1():
     global common_lock, counting_lock, resp_lock, resource
     common_setup()
 
@@ -29,7 +29,7 @@ def test_CountingLock_1():
     assert(acquired_lock == True)
     common_lock.release()
 
-def test_CountingLock_len():
+def test_LightSwitch_len():
     global common_lock, counting_lock, resp_lock, resource
     common_setup()
     assert( 0==len(counting_lock) )
