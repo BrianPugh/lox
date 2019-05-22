@@ -25,6 +25,9 @@ class CountingLock:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.release()
 
+    def __len__(self):
+        return self.get_count()
+
     def acquire(self):
         with self._counter_lock:
             self._counter += 1

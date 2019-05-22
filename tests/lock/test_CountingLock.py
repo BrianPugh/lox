@@ -6,14 +6,39 @@ from time import sleep, time
 SLEEP_TIME = 1.5
 N_WORKERS = 5
 
-rw_lock = None
+common_lock = None
+counting_lock = None
 resp_lock = None
 resource = None
 
 def common_setup():
-    global rw_lock, resp_lock
-    rw_lock = OneWriterManyReader()
+    global common_lock, counting_lock, resp_lock
+
+    common_lock = threading.Lock()
+    counting_lock = CountingLock(common_lock)
     resp_lock = threading.Lock()
 
 def test_CountingLock_1():
-    pass
+    global common_lock, counting_lock, resp_lock, resource
+    common_setup()
+
+    with counting_lock:
+        acquired_lock = common_lock.acquire(timeout=0)
+        assert(acquired_lock == False)
+    acquired_lock = common_lock.acquire(timeout=0)
+    assert(acquired_lock == True)
+    common_lock.release()
+
+def test_CountingLock_len():
+    global common_lock, counting_lock, resp_lock, resource
+    common_setup()
+    assert( 0==len(counting_lock) )
+    counting_lock.acquire()
+    assert( 1==len(counting_lock) )
+    counting_lock.acquire()
+    assert( 2==len(counting_lock) )
+    counting_lock.release()
+    assert( 1==len(counting_lock) )
+    counting_lock.release()
+    assert( 0==len(counting_lock) )
+

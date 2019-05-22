@@ -31,6 +31,9 @@ class OneWriterManyReader:
         finally:
             self.release(rw_flag)
 
+    def __len__(self):
+        return len(self.read_counter)
+
     def _check_rw_flag(self, rw_flag):
         rw_flag = rw_flag.lower()
         if rw_flag == 'r':
