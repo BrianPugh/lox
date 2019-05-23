@@ -30,12 +30,21 @@ Threading and Multiprocessing for every project.
 Features
 --------
 
-* TODO
+* Powerful, intuitive multithreading in just 2 additional lines of code
+* Advanced thread synchronization, communication, and resource management tools
 
 Installation
 -------
 
+`pip install .`
+
+Contributing
+-------
+Install the library in editable mode:
+
 `pip3 install -e .`
+
+All new features must have unit tests.
 
 Credits
 -------
