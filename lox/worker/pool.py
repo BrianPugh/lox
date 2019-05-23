@@ -1,10 +1,10 @@
-"""@package Session
+"""@package Pool
 Easily execute a function in multiple threads
 
 Calling the decorated function as normal will put it on a queue
 
 # Will operate with a maximum of 4 workers
-@session(4)
+@lox.pool(4)
 def complex_function(x):
     sleep(10)
 
@@ -18,12 +18,12 @@ from queue import Queue
 from functools import wraps
 from collections import namedtuple, deque
 
-__all__ = ["session",]
+__all__ = ["pool",]
 
 Job = namedtuple('Job', ['index', 'func', 'args', 'kwargs',])
 Response = namedtuple('Response', ['index'])
 
-class _SessionWorker(threading.Thread):
+class _PoolWorker(threading.Thread):
     _timeout = 1
     def __init__(self, job_queue, res, worker_sem, lightswitch, **kwargs):
         self.job_queue = job_queue;
@@ -44,7 +44,7 @@ class _SessionWorker(threading.Thread):
         self.worker_sem.release() # indicate worker is terminated
         return
 
-class _SessionWrapper:
+class _PoolWrapper:
     def __init__(self, max_workers, func, daemon=None):
         """
         @param max_workers Maximum number of threads to deploy
@@ -81,7 +81,7 @@ class _SessionWrapper:
         Create a worker if under maximum capacity
         """
         if self.workers_sem.acquire(timeout=0):
-            _SessionWorker(self.job_queue, self.response, self.workers_sem, self.job_ls, daemon=self.daemon).start()
+            _PoolWorker(self.job_queue, self.response, self.workers_sem, self.job_ls, daemon=self.daemon).start()
 
     def scatter(self, *args, **kwargs):
         """Enqueue a job to be processed by workers.
@@ -103,8 +103,8 @@ class _SessionWrapper:
             self.response = deque()
         return response
 
-def session(max_workers, daemon=None):
+def pool(max_workers, daemon=None):
     def wrapper(func):
-        return _SessionWrapper(max_workers, func, daemon=daemon)
+        return _PoolWrapper(max_workers, func, daemon=daemon)
     return wrapper
 
