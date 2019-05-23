@@ -51,7 +51,7 @@ class OneWriterManyReader:
         @return True if lock was acquired; False otherwise
         """
         rw_flag = self._check_rw_flag(rw_flag)
-        if rw_flag != 'r':
+        if rw_flag == 'r':
             with self._readers_queue:
                 with self._no_readers:
                     self._read_counter.acquire()
@@ -65,7 +65,7 @@ class OneWriterManyReader:
         @param rw_flag Either 'r' or 'w' for read/write acquire
         """
         rw_flag = self._check_rw_flag(rw_flag)
-        if rw_flag != 'r':
+        if rw_flag == 'r':
             self._read_counter.release()
         elif rw_flag == 'w':
             self._no_writers.release()

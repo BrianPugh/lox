@@ -99,3 +99,69 @@ def test_OneWriterManyReader_rw():
         for r,s in zip(resp, soln):
             assert( r == s )
 
+def test_bathroom_example():
+    """
+    Scenario:
+        A janitor needs to clean a restroom, but is not allowed to enter until
+        all people are out of the restroom. How do we implement this?
+    """
+    restroom = OneWriterManyReader()
+
+    n_people = 5
+
+    def janitor():
+        with restroom('w'): # block until the restroom is no longer occupied
+            print("(%0.3f s) Janitor  entered the restroom" % ( time() - t_start,))
+            sleep(1) # clean the restroom
+            print("(%0.3f s) Janitor  exited  the restroom" % ( time() - t_start,))
+
+    def people( id ):
+        if id == 0: # Get the starting time of execution for display purposes
+            global t_start
+            t_start = time()
+        with restroom('r'): # block if a janitor is in the restroom
+            print("(%0.3f s) Person %d entered the restroom" % ( time() - t_start, id,))
+            sleep(1) # use the restroom
+            print("(%0.3f s) Person %d exited  the restroom" % ( time() - t_start, id,))
+
+    people_threads = [threading.Thread(target=people, args=(i,)) for i in range(n_people)]
+    janitor_thread = threading.Thread(target=janitor)
+
+    for i, person in enumerate(people_threads):
+        person.start()                 # Person i will now attempt to enter the restroom
+        sleep(0.5)                     # wait for 0.5 second; a person takes 1 second in the restroom
+        if i==0:                       # While the first person is in the restroom...
+            janitor_thread.start()     # the janitor would like to enter. HOWEVER...
+                                       # A new person (until all n_people are done) enters every 0.5 seconds.
+    # Wait for all threads to finish
+    for t in people_threads:
+        t.join()
+    janitor_thread.join()
+
+    # The results will look like:
+    """
+    Running Restroom Demo
+    (0.000 s) Person 0 entered the restroom
+    (1.001 s) Person 0 exited  the restroom
+    (1.001 s) Janitor  entered the restroom
+    (2.003 s) Janitor  exited  the restroom
+    (2.003 s) Person 1 entered the restroom
+    (2.003 s) Person 2 entered the restroom
+    (2.003 s) Person 3 entered the restroom
+    (2.005 s) Person 4 entered the restroom
+    (3.003 s) Person 1 exited  the restroom
+    (3.004 s) Person 2 exited  the restroom
+    (3.004 s) Person 3 exited  the restroom
+    (3.006 s) Person 4 exited  the restroom
+    """
+    # While Person 0 is in the restroom, the Janitor is waiting to enter (at around 0.5000 s).
+    # While the Janitor is waiting, he doesn't let anyone else into the room.
+    # After Person 0, leaves the room, the Janitor enters.
+    # After cleaning, the Janitor leaves at the 2.000 second mark.
+    # Ever since the janitor was waiting (at 0.500 s), Person 1, Person 2, Person 3, and Person 4 have been lining up to enter.
+    # Now that the Janitor left the restroom, all the waiting people go in at the same time.
+
+
+if __name__ == "__main__":
+    print("Running Restroom Demo")
+    test_bathroom_example()
