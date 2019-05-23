@@ -38,6 +38,7 @@ class ResourceSemaphore:
         val : int
             Number of resources available
         """
+
         if val <= 0:
             raise ValueError("val must be >0")
 
@@ -101,15 +102,32 @@ class ResourceSemaphore:
         return self.queue.qsize()
 
     def acquire(self, timeout=None):
+        """Blocking acquire resource
+
+        Parameters
+        ----------
+        timeout : float
+            Maximum number of seconds to wait before returning
+
+        Returns
+        ----------
+            Resource index on successful acquire. None on timeout
         """
-        Returns None on timeout
-        """
+
         try:
             return self.queue.get(timeout=timeout)
         except Empty:
             return None
 
     def release(self, index):
+        """ Release resource at index
+
+        Parameters
+        ----------
+        index : int
+            Index of resource to release
+        """
+
         try:
             self.queue.put_nowait(index)
         except Full:
