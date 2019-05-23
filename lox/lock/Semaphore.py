@@ -5,8 +5,10 @@ Example use-case:
     You have 4 GPUs: [0,1,2,3].
     You have many threads that occasionally require a GPU for part of their algorithm.
 
-    resource_semaphore = ResourceSemaphore
-    with resource_semaphore
+    resource_semaphore = ResourceSemaphore(4)
+    with resource_semaphore as index:
+        print("Obtained resource %d" % (index,)) # >"Obtained resource 0"
+        perform_algorithm(gpu_id=index)
 """
 import threading
 from threading import Lock, BoundedSemaphore
