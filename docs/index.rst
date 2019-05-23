@@ -1,5 +1,15 @@
-Welcome to lox's documentation!
-======================================
+Lox
+===
+
+.. include:: desc_short.rst
+
+Features
+========
+
+.. include:: features.rst
+
+Contents
+========
 
 .. toctree::
    :maxdepth: 2

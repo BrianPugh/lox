@@ -20,7 +20,7 @@ lox
 
 
 
-Threading and Multiprocessing for every project.
+.. include:: docs/desc_short.rst
 
 
 * Free software: MIT license
@@ -34,9 +34,7 @@ Installation
 Features
 --------
 
-* Powerful, intuitive multithreading in just 2 additional lines of code
-
-* Advanced thread synchronization, communication, and resource management tools
+.. include:: docs/features.rst
 
 Examples
 --------
@@ -44,18 +42,7 @@ Examples
 Easy Multithreading
 ^^^^^^^^^^^^^^^^^^^
 
-    >>> import lox
-    >>> @lox.pool(3) # Maximum of 3 concurrent threads
-    >>> def multiply(a,b):
-    >>>    return a*b
-    >>> multiply(3,4) # Function works as normal
-    12
-    >>> xs = [1,2,3,4,5,]
-    >>> ys = [6,7,7,8,9,]
-    >>> [multiply.scatter(x,y) for x,y in zip(xs,ys)] 
-    >>> multiply.gather()
-    [ 6, 14, 21, 32, 45 ]
-
+.. include:: docs/examples/easy_multithreading.rst
 
 Contributing
 ------------
