@@ -1,9 +1,8 @@
 """Semaphore
 """
 
-import threading
-from threading import Lock, BoundedSemaphore
-from queue import Queue
+from threading import Lock
+from queue import Queue, Empty, Full
 from contextlib import contextmanager
 
 __all__ = ["ResourceSemaphore",]
@@ -67,11 +66,13 @@ class ResourceSemaphore:
             Set timeout=None for no timeout.
         """
 
+        index = None
         try:
             index = self.acquire(timeout=timeout)
             yield index
         finally:
             if index is not None:
+                print(index)
                 self.release(index)
 
     def __enter__(self):
@@ -88,6 +89,12 @@ class ResourceSemaphore:
         return self.__call__().__enter__()
 
     def __exit__(self, exc_type, exc_value, traceback):
+        """ Exit Context Manager
+
+        Don't do anything since it's handled by the contextmanager wrapped
+        __call__ function
+        """
+
         pass
 
     def __len__(self):
@@ -95,16 +102,16 @@ class ResourceSemaphore:
 
     def acquire(self, timeout=None):
         """
-        Returns -1 on timeout
+        Returns None on timeout
         """
         try:
             return self.queue.get(timeout=timeout)
-        except queue.Empty:
-            return -1
+        except Empty:
+            return None
 
     def release(self, index):
         try:
             self.queue.put_nowait(index)
-        except queue.Full:
+        except Full:
             raise Exception("ResourceSemaphore released more times than acquired")
 
