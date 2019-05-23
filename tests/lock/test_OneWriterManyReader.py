@@ -19,7 +19,6 @@ def common_create_workers(func, n, *args):
     threads = []
     for i in range(n):
         t = threading.Thread(target=func, args=args)
-        t.setDaemon(True)
         threads.append(t)
 
     t_start = time()
