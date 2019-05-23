@@ -7,7 +7,7 @@ lox
         :target: https://pypi.python.org/pypi/lox
 
 .. image:: https://img.shields.io/travis/BrianPugh/lox.svg
-        :target: https://travis-ci.org/BrianPugh/lox
+        :target: https://travis-ci.com/BrianPugh/lox
 
 .. image:: https://readthedocs.org/projects/lox/badge/?version=latest
         :target: https://lox.readthedocs.io/en/latest/?badge=latest
@@ -27,23 +27,23 @@ Threading and Multiprocessing for every project.
 * Documentation: https://lox.readthedocs.io.
 
 Installation
--------
+------------
 
-`pip install .`
+    pip install git+https://github.com/BrianPugh/lox#egg=lox
 
 Features
 --------
 
 * Powerful, intuitive multithreading in just 2 additional lines of code
+
 * Advanced thread synchronization, communication, and resource management tools
 
 Examples
--------
+--------
 
 Easy Multithreading
--------
+^^^^^^^^^^^^^^^^^^^
 
-```
     >>> import lox
     >>> @lox.pool(3) # Maximum of 3 concurrent threads
     >>> def multiply(a,b):
@@ -56,14 +56,12 @@ Easy Multithreading
     >>> multiply.gather()
     [ 6, 14, 21, 32, 45 ]
 
-```
-
 
 Contributing
--------
+------------
 Install the library in editable mode:
 
-`pip3 install -e .`
+    pip3 install -e .
 
 All new features must have unit tests.
 
