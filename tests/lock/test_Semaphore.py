@@ -16,7 +16,9 @@ def check_valid(res, n_resource):
             assert( res[i] != res[j] )
 
 def test_with_no_args_1():
-    resource_semaphore = lox.ResourceSemaphore( n_resource )
+    print("meow")
+    resource_semaphore = lox.ResourceSemaphore( 1 )
+    print("meow")
     resp = 0
     with resource_semaphore:
         resp = 1
@@ -50,8 +52,7 @@ def test_multithread_with_no_args_1():
     resource_semaphore = lox.ResourceSemaphore( n_resource )
 
     def func():
-        with resource_semaphore:
-            index = 0
+        with resource_semaphore as index:
             sleep(SLEEP_TIME)
             with resp_lock:
                 resp.append(index)
@@ -63,7 +64,5 @@ def test_multithread_with_no_args_1():
     for t in threads:
         t.join()
 
-    assert( 0 )
     check_valid(resp, n_resource)
-
 

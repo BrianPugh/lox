@@ -36,11 +36,13 @@ class ResourceSemaphore:
                 self.release(index)
 
     def __enter__(self):
-        print("meow")
-        index = self.acquire()
+        return self.__call__().__enter__()
 
     def __exit__(self, exc_type, exc_value, traceback):
         pass
+
+    def __len__(self):
+        return self.queue.qsize()
 
     def acquire(self, timeout=None):
         """
