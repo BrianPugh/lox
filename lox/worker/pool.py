@@ -106,5 +106,12 @@ class _PoolWrapper:
 def pool(max_workers, daemon=None):
     def wrapper(func):
         return _PoolWrapper(max_workers, func, daemon=daemon)
-    return wrapper
+
+    if isinstance(max_workers, int):
+        # assume this is being called from decorator
+        return wrapper
+    else:
+        func = max_workers
+        max_workers = 50
+        return _PoolWrapper(max_workers, func, daemon=daemon)
 
