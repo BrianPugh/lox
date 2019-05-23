@@ -66,3 +66,12 @@ def test_multithread_with_no_args_1():
 
     check_valid(resp, n_resource)
 
+def test_invalid_constructor():
+    try:
+        resource_semaphore = lox.ResourceSemaphore( 0 )
+        assert(False)
+    except ValueError:
+        assert(True)
+
+def test_timeout():
+    resource_semaphore = lox.ResourceSemaphore( 1 )

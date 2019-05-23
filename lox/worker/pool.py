@@ -163,7 +163,6 @@ def pool(max_workers, daemon=None):
         and a default number of max_workers is used.
     """
 
-    @wraps(func)
     def wrapper(func):
         return _PoolWrapper(max_workers, func, daemon=daemon)
 
