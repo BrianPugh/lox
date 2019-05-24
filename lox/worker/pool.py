@@ -1,13 +1,30 @@
-"""@package Pool
-Easily execute a function in multiple threads
+"""
+.. module:: pool
+   :synopsis: Easily execute a function in multiple threads.
 
 Calling the decorated function as normal will put it on a queue
 
-# Will operate with a maximum of 4 workers
-@lox.pool(4)
-def complex_function(x):
-    sleep(10)
-
+Example:
+    >>> import lox
+    >>> @lox.pool(4) # Will operate with a maximum of 4 threads
+    >>> def foo(x,y):
+    >>>     print("Foo: %d * %d" % (x,y))
+    >>>     return x*y
+    >>>
+    >>> foo(1)
+    Foo: 3 * 4
+    12
+    >>> for i in range(5):
+    >>>     foo.scatter(i, i+1)
+    >>>
+    Foo: 0 * 1
+    Foo: 1 * 2
+    Foo: 2 * 3
+    Foo: 3 * 4
+    Foo: 4 * 5
+    >>> results = foo.gather()
+    >>> print(results)
+    [0, 2, 6, 12, 20]
 """
 
 import threading
@@ -146,14 +163,26 @@ def pool(max_workers, daemon=None):
     """ Decorator to execute a function in multiple threads
 
     Example:
-        >>> @lox.pool
-        >>> def multiply(a,b):
-        >>>    return a*b
-        >>> multiply(3,4) # Function works as normal
+        >>> import lox
+        >>> @lox.pool(4) # Will operate with a maximum of 4 threads
+        >>> def foo(x,y):
+        >>>     print("Foo: %d * %d" % (x,y))
+        >>>     return x*y
+        >>>
+        >>> foo(1)
+        Foo: 3 * 4
         12
-        >>> [multiply.scatter(x,y) for x,y in zip([2,3],[5,6])]
-        >>> multiply.gather()
-        [ 10, 18 ]
+        >>> for i in range(5):
+        >>>     foo.scatter(i, i+1)
+        >>>
+        Foo: 0 * 1
+        Foo: 1 * 2
+        Foo: 2 * 3
+        Foo: 3 * 4
+        Foo: 4 * 5
+        >>> results = foo.gather()
+        >>> print(results)
+        [0, 2, 6, 12, 20]
 
     Parameters
     ----------

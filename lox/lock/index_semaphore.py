@@ -1,13 +1,17 @@
-"""Semaphore
+"""
+.. module:: index_semaphore
+   :synopsis: BoundedSemaphore where acquires return an index from [0, val)
+
+.. moduleauthor:: Brian Pugh <bnp117@gmail.com>
 """
 
 from threading import Lock
 from queue import Queue, Empty, Full
 from contextlib import contextmanager
 
-__all__ = ["ResourceSemaphore",]
+__all__ = ["IndexSemaphore",]
 
-class ResourceSemaphore:
+class IndexSemaphore:
     """ BoundedSemaphore where acquires return an index from [0, val)
 
     Example usecase: thread acquiring a GPU
@@ -31,7 +35,7 @@ class ResourceSemaphore:
     """
 
     def __init__(self, val):
-        """Create a ResourceSemaphore object
+        """Create an IndexSemaphore object
 
         Parameters
         ----------
@@ -53,9 +57,9 @@ class ResourceSemaphore:
         Only to be call as part of a "with" statement.
 
         Example:
-            >>> resource_semaphore = ResourceSemaphore(4)
-            >>> with resource_semaphore(timeout=1) as index:
-            >>>     print("Obtained resource %d" % (index,)) # >"Obtained resource 0"
+            >>> sem = IndexSemaphore(4)
+            >>> with sem(timeout=1) as index:
+            >>>     print("Obtained resource %d" % (index,))
             >>>
             Obtained resouce 0
 
@@ -80,9 +84,9 @@ class ResourceSemaphore:
         """Context manager enter with no arguments.
 
         Example:
-            >>> resource_semaphore = ResourceSemaphore(4)
-            >>> with resource_semaphore as index:
-            >>>     print("Obtained resource %d" % (index,)) # >"Obtained resource 0"
+            >>> sem = IndexSemaphore(4)
+            >>> with sem as index:
+            >>>     print("Obtained resource %d" % (index,))
             >>>
             Obtained resouce 0
         """
@@ -131,5 +135,5 @@ class ResourceSemaphore:
         try:
             self.queue.put_nowait(index)
         except Full:
-            raise Exception("ResourceSemaphore released more times than acquired")
+            raise Exception("IndexSemaphore released more times than acquired")
 

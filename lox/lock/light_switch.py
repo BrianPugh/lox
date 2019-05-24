@@ -1,9 +1,14 @@
-"""@package LightSwitch
+"""
+.. module:: LightSwitch
+   :synopsis: Lock acquire on first entry and release on last exit.
+
+.. moduleauthor:: Brian Pugh <bnp117@gmail.com>
+
 See https://w3.cs.jmu.edu/kirkpams/OpenCSF/Books/cs361/html/DesignAdv.html
 
 """
 
-import threading
+from threading import RLock
 
 __all__ = ["LightSwitch",]
 
@@ -50,7 +55,7 @@ class LightSwitch:
 
         self.lock = lock
         self.counter = 0
-        self._counter_lock = threading.RLock()
+        self._counter_lock = RLock()
 
     @property
     def lock(self):

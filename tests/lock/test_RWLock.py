@@ -1,5 +1,5 @@
 import threading
-from lox import OneWriterManyReader
+from lox import RWLock
 from copy import copy
 from time import sleep, time
 
@@ -12,7 +12,7 @@ resource = None
 
 def common_setup():
     global rw_lock, resp_lock
-    rw_lock = OneWriterManyReader()
+    rw_lock = RWLock()
     resp_lock = threading.Lock()
 
 def common_create_workers(func, n, *args):
@@ -45,7 +45,7 @@ def write_worker(val):
         resource = val
     return
 
-def test_OneWriterManyReader_r():
+def test_RWLock_r():
     global rw_lock, resp_lock, resource
     common_setup()
     resource = 0
@@ -63,7 +63,7 @@ def test_OneWriterManyReader_r():
         for s in resp:
             assert(resp == resource)
 
-def test_OneWriterManyReader_w():
+def test_RWLock_w():
     global rw_lock, resp_lock, resource
     common_setup()
     resource = 0
@@ -76,7 +76,7 @@ def test_OneWriterManyReader_w():
 
     assert( resource == new_val )
 
-def test_OneWriterManyReader_rw():
+def test_RWLock_rw():
     global rw_lock, resp_lock, resource
     common_setup()
     return
@@ -100,19 +100,36 @@ def test_OneWriterManyReader_rw():
             assert( r == s )
 
 def test_bathroom_example():
+    # Note: after the janitor exits, the remaining people are nondeterministic
+    sol = [
+            "p_0_enter",
+            "p_0_exit",
+            "j_enter",
+            "j_exit",
+            ]
+
+    res = bathroom_example()[:4]
+
+    for r,s in zip(res, sol):
+        assert( r == s )
+
+def bathroom_example():
     """
     Scenario:
         A janitor needs to clean a restroom, but is not allowed to enter until
         all people are out of the restroom. How do we implement this?
     """
-    restroom = OneWriterManyReader()
-
+    restroom = RWLock()
+    res = []
     n_people = 5
+    sleep_time = 0.1
 
     def janitor():
         with restroom('w'): # block until the restroom is no longer occupied
+            res.append('j_enter')
             print("(%0.3f s) Janitor  entered the restroom" % ( time() - t_start,))
-            sleep(1) # clean the restroom
+            sleep(sleep_time) # clean the restroom
+            res.append('j_exit')
             print("(%0.3f s) Janitor  exited  the restroom" % ( time() - t_start,))
 
     def people( id ):
@@ -120,8 +137,10 @@ def test_bathroom_example():
             global t_start
             t_start = time()
         with restroom('r'): # block if a janitor is in the restroom
+            res.append("p_%d_enter" % (id,))
             print("(%0.3f s) Person %d entered the restroom" % ( time() - t_start, id,))
-            sleep(1) # use the restroom
+            sleep(sleep_time) # use the restroom
+            res.append("p_%d_exit" % (id,))
             print("(%0.3f s) Person %d exited  the restroom" % ( time() - t_start, id,))
 
     people_threads = [threading.Thread(target=people, args=(i,)) for i in range(n_people)]
@@ -129,7 +148,7 @@ def test_bathroom_example():
 
     for i, person in enumerate(people_threads):
         person.start()                 # Person i will now attempt to enter the restroom
-        sleep(0.5)                     # wait for 0.5 second; a person takes 1 second in the restroom
+        sleep(sleep_time * 0.6)        # wait for 60% the time a person spends in the restroom
         if i==0:                       # While the first person is in the restroom...
             janitor_thread.start()     # the janitor would like to enter. HOWEVER...
                                        # A new person (until all n_people are done) enters every 0.5 seconds.
@@ -142,17 +161,17 @@ def test_bathroom_example():
     """
     Running Restroom Demo
     (0.000 s) Person 0 entered the restroom
-    (1.001 s) Person 0 exited  the restroom
-    (1.001 s) Janitor  entered the restroom
-    (2.003 s) Janitor  exited  the restroom
-    (2.003 s) Person 1 entered the restroom
-    (2.003 s) Person 2 entered the restroom
-    (2.003 s) Person 3 entered the restroom
-    (2.005 s) Person 4 entered the restroom
-    (3.003 s) Person 1 exited  the restroom
-    (3.004 s) Person 2 exited  the restroom
-    (3.004 s) Person 3 exited  the restroom
-    (3.006 s) Person 4 exited  the restroom
+    (0.100 s) Person 0 exited  the restroom
+    (0.101 s) Janitor  entered the restroom
+    (0.201 s) Janitor  exited  the restroom
+    (0.201 s) Person 1 entered the restroom
+    (0.202 s) Person 2 entered the restroom
+    (0.202 s) Person 3 entered the restroom
+    (0.243 s) Person 4 entered the restroom
+    (0.302 s) Person 1 exited  the restroom
+    (0.302 s) Person 2 exited  the restroom
+    (0.303 s) Person 3 exited  the restroom
+    (0.343 s) Person 4 exited  the restroom
     """
     # While Person 0 is in the restroom, the Janitor is waiting to enter (at around 0.5000 s).
     # While the Janitor is waiting, he doesn't let anyone else into the room.
@@ -160,8 +179,9 @@ def test_bathroom_example():
     # After cleaning, the Janitor leaves at the 2.000 second mark.
     # Ever since the janitor was waiting (at 0.500 s), Person 1, Person 2, Person 3, and Person 4 have been lining up to enter.
     # Now that the Janitor left the restroom, all the waiting people go in at the same time.
+    return res
 
 
 if __name__ == "__main__":
     print("Running Restroom Demo")
-    test_bathroom_example()
+    bathroom_example()

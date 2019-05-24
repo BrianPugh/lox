@@ -1,14 +1,18 @@
-"""@package OneWriterManyReader
+"""
+.. module:: rw_Lock
+   :synopsis: Synchronization primitive to solves the readers–writers problem.
+
+.. moduleauthor:: Brian Pugh <bnp117@gmail.com>
 """
 
-import threading
+from threading import Lock
 from contextlib import contextmanager
-from lox.lock.LightSwitch import LightSwitch
+from . import LightSwitch
 
-__all__ = ["OneWriterManyReader",]
+__all__ = ["RWLock",]
 
-class OneWriterManyReader:
-    """Lock for a One-writer-Many-reader scenario.
+class RWLock:
+    """Lock for a Multi-Reader-Single-Writer scenario.
 
     Unlimited numbers of reader can obtain the lock, but as soon as a writer
     attempts to acquire the lock, all reads are blocked until the current readers
@@ -29,11 +33,11 @@ class OneWriterManyReader:
 
     """
     def __init__(self):
-        self._no_writers    = threading.Lock()
-        self._no_readers    = threading.Lock()
-        self.read_counter  = LightSwitch(self._no_writers)
+        self._no_writers    = Lock()
+        self._no_readers    = Lock()
+        self.read_counter   = LightSwitch(self._no_writers)
         self._write_counter = LightSwitch(self._no_readers)
-        self._readers_queue = threading.Lock()
+        self._readers_queue = Lock()
 
     @contextmanager
     def __call__(self, rw_flag:str, timeout=-1):
