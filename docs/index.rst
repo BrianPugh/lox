@@ -6,18 +6,20 @@ shared resources.
 
 A very simple example is as follows.
 
+::
+
     >>> import lox
     >>> @lox.pool(4) # Will operate with a maximum of 4 threads
     >>> def foo(x,y):
     >>>     print("Foo: %d * %d" % (x,y))
     >>>     return x*y
-    >>>
+    >>> 
     >>> foo(1)
     Foo: 3 * 4
     12
     >>> for i in range(5):
     >>>     foo.scatter(i, i+1)
-    >>>
+    >>> 
     Foo: 0 * 1
     Foo: 1 * 2
     Foo: 2 * 3
