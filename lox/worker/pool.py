@@ -186,14 +186,14 @@ def pool(max_workers, daemon=None):
 
     Methods
     -------
-    __call__( *args, **kwargs )
+    __call__( \*args, \*\*kwargs )
         Vanilla passthrough function execution. Default user function behavior.
 
     __len__()
         Returns the current job queue length
 
-    scatter( *args, **kwargs)
-        Start a job executing func( *args, **kwargs ).
+    scatter( \*args, \*\*kwargs)
+        Start a job executing func( \*args, \*\*kwargs ).
         Workers are spun up automatically.
         Obtain results via gather()
 

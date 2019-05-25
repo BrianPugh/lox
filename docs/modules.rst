@@ -9,8 +9,7 @@ Worker
 Pool
 ^^^^
 
-.. autoclass:: lox.worker.pool
-   :members:
+.. autofunction:: lox.worker.pool
 
 Lock
 ----
