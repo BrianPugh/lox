@@ -6,8 +6,8 @@ lox
 .. image:: https://img.shields.io/pypi/v/lox.svg
         :target: https://pypi.python.org/pypi/lox
 
-.. image:: https://img.shields.io/travis/BrianPugh/lox.svg
-        :target: https://travis-ci.com/BrianPugh/lox.svg?branch=master
+.. image:: https://travis-ci.com/BrianPugh/lox.svg?branch=master
+        :target: https://travis-ci.com/BrianPugh/lox
 
 .. image:: https://readthedocs.org/projects/lox/badge/?version=latest
         :target: https://lox.readthedocs.io/en/latest/?badge=latest
