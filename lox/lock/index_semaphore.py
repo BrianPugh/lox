@@ -24,6 +24,9 @@ class IndexSemaphore:
     __enter__()
         Context manager enter with no arguments.
 
+    __exit__()
+        Context manager exit
+
     __len__()
         Returns the number of 'free' resources.
 
