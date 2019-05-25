@@ -2,18 +2,19 @@ import threading
 from lox import RWLock
 from copy import copy
 from time import sleep, time
+from collections import deque
 
 SLEEP_TIME = 0.01
 N_WORKERS = 5
 
 rw_lock = None
-resp_lock = None
 resource = None
+resp = None
 
 def common_setup():
-    global rw_lock, resp_lock
+    global rw_lock, resp
     rw_lock = RWLock()
-    resp_lock = threading.Lock()
+    resp = deque()
 
 def common_create_workers(func, n, *args):
     threads = []
@@ -28,28 +29,24 @@ def common_create_workers(func, n, *args):
     return threads, t_start
 
 def read_worker():
-    global resp_lock, rw_lock
+    global rw_lock, resp
     with rw_lock('r'):
         local_copy = copy(resource)
         sleep(SLEEP_TIME) # to make sure that all workers are truley accessing the resource at the same time
 
-        # read resource
-    with resp_lock:
-        resp.append(local_copy)
+    resp.append(local_copy)
     return
 
 def write_worker(val):
     global rw_lock, resource
     with rw_lock('w'):
-        print("meow "*10 + str(val))
         resource = val
     return
 
 def test_RWLock_r():
-    global rw_lock, resp_lock, resource
+    global rw_lock, resource, resp
     common_setup()
     resource = 0
-    resp = []
 
     threads, t_start = common_create_workers(read_worker, N_WORKERS)
     for t in threads:
@@ -59,12 +56,11 @@ def test_RWLock_r():
 
     assert( N_WORKERS > 2 )
     assert(t_diff < (N_WORKERS-1)*SLEEP_TIME) # for this to be true, readers have to access at same time (good)
-    with resp_lock:
-        for s in resp:
-            assert(resp == resource)
+    for r in resp:
+        assert( r == resource)
 
 def test_RWLock_w():
-    global rw_lock, resp_lock, resource
+    global rw_lock, resource
     common_setup()
     resource = 0
     new_val = 5
@@ -77,11 +73,10 @@ def test_RWLock_w():
     assert( resource == new_val )
 
 def test_RWLock_rw():
-    global rw_lock, resp_lock, resource
+    global rw_lock, resource, resp
     common_setup()
     return
     resource = 0
-    resp = []
     soln = [0,]*N_WORKERS + [5,]*N_WORKERS
 
     threads_r1, t_start_r1 = common_create_workers(read_worker, N_WORKERS)
@@ -95,9 +90,8 @@ def test_RWLock_rw():
     for t in threads_r2:
         t.join()
 
-    with resp_lock:
-        for r,s in zip(resp, soln):
-            assert( r == s )
+    for r,s in zip(resp, soln):
+        assert( r == s )
 
 def test_bathroom_example():
     # Note: after the janitor exits, the remaining people are nondeterministic
