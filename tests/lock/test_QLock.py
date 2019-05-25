@@ -26,3 +26,19 @@ def test_1():
 
     for r, s in zip(res, sol):
         assert( r == s )
+
+def test_perf_qlock(benchmark):
+    lock = QLock()
+
+    @benchmark
+    def acquire_release():
+        lock.acquire()
+        lock.release()
+
+def test_perf_lock(benchmark):
+    lock = Lock()
+
+    @benchmark
+    def acquire_release():
+        lock.acquire()
+        lock.release()
