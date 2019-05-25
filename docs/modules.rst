@@ -27,6 +27,11 @@ RWLock
 .. autoclass:: lox.lock.RWLock
    :members:
 
+QLock
+^^^^^
+.. autoclass:: lox.lock.QLock
+   :members:
+
 IndexSemaphore
 ^^^^^^^^^^^^^^
 .. autoclass:: lox.lock.IndexSemaphore
