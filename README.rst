@@ -7,7 +7,7 @@ lox
         :target: https://pypi.python.org/pypi/lox
 
 .. image:: https://img.shields.io/travis/BrianPugh/lox.svg
-        :target: https://travis-ci.com/BrianPugh/lox
+        :target: https://travis-ci.com/BrianPugh/lox.svg?branch=master
 
 .. image:: https://readthedocs.org/projects/lox/badge/?version=latest
         :target: https://lox.readthedocs.io/en/latest/?badge=latest
@@ -19,7 +19,6 @@ lox
      :alt: Updates
 
 
-
 Threading made easy.
 
 
@@ -29,7 +28,7 @@ Threading made easy.
 Installation
 ------------
 
-    pip install git+https://github.com/BrianPugh/lox#egg=lox
+    pip install lox
 
 Features
 --------
@@ -38,7 +37,7 @@ Features
 
 * Advanced thread synchronization, communication, and resource management tools
 
-Examples
+Usage
 --------
 
 Easy Multithreading
@@ -56,19 +55,3 @@ Easy Multithreading
     >>> multiply.gather()
     [ 6, 14, 21, 32, 45 ]
 
-
-Contributing
-------------
-Install the library in editable mode:
-
-    pip3 install -e .
-
-All new features must have unit tests.
-
-Credits
--------
-
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
