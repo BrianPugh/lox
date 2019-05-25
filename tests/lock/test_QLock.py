@@ -25,7 +25,12 @@ def test_1():
         t.join()
 
     for r, s in zip(res, sol):
-        assert( r == s )
+        assert r == s
+
+def test_timeout():
+    qlock = QLock()
+    assert qlock.acquire()
+    assert False==qlock.acquire(timeout=SLEEP_TIME)
 
 def test_perf_qlock(benchmark):
     lock = QLock()
