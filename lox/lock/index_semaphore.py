@@ -21,12 +21,6 @@ class IndexSemaphore:
     __call__(timeout=None)
         Enter context manager when a timeout wants to be specified.
 
-    __enter__()
-        Context manager enter with no arguments.
-
-    __exit__()
-        Context manager exit
-
     __len__()
         Returns the number of 'free' resources.
 
@@ -63,7 +57,7 @@ class IndexSemaphore:
             >>> sem = IndexSemaphore(4)
             >>> with sem(timeout=1) as index:
             >>>     print("Obtained resource %d" % (index,))
-            >>>
+            >>> 
             Obtained resouce 0
 
         Parameters
@@ -74,36 +68,14 @@ class IndexSemaphore:
             Set timeout=None for no timeout.
         """
 
-        index = None
+        index = self.acquire(timeout=timeout)
         try:
-            index = self.acquire(timeout=timeout)
             yield index
+        except Exception as e:
+            print(e)
         finally:
             if index is not None:
-                print(index)
                 self.release(index)
-
-    def __enter__(self):
-        """Context manager enter with no arguments.
-
-        Example:
-            >>> sem = IndexSemaphore(4)
-            >>> with sem as index:
-            >>>     print("Obtained resource %d" % (index,))
-            >>>
-            Obtained resouce 0
-        """
-
-        return self.__call__().__enter__()
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        """ Exit Context Manager
-
-        Don't do anything since it's handled by the contextmanager wrapped
-        __call__ function
-        """
-
-        pass
 
     def __len__(self):
         return self.queue.qsize()

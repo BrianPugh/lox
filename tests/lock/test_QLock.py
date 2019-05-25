@@ -10,6 +10,7 @@ def test_1():
     qlock = QLock()
 
     def worker( x ):
+        nonlocal res
         with qlock:
             res += x
 

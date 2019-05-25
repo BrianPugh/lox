@@ -94,6 +94,15 @@ class LightSwitch:
 
         When the internal counter is incremented from zero, it will acquire
         the provided lock.
+
+        Parameters
+        ----------
+        timeout : float
+            Maximum number of seconds to wait before aborting.
+
+        Return
+        ------
+            Return True on success, False on failure (like timeout)
         """
 
         # Acquire the counter_lock while keeping track of approximately time
