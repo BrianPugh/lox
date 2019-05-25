@@ -9,6 +9,7 @@ See https://w3.cs.jmu.edu/kirkpams/OpenCSF/Books/cs361/html/DesignAdv.html
 """
 
 from threading import RLock
+from time import time
 
 __all__ = ["LightSwitch",]
 
@@ -88,17 +89,33 @@ class LightSwitch:
 
         return self.counter
 
-    def acquire(self):
+    def acquire(self, timeout=-1):
         """Acquire the LightSwitch and increment the internal counter.
 
         When the internal counter is incremented from zero, it will acquire
         the provided lock.
         """
 
-        with self._counter_lock:
-            self.counter += 1
-            if self.counter == 1:
-                self._lock.acquire()
+        # Acquire the counter_lock while keeping track of approximately time
+        t_start = time()
+        if not self._counter_lock.acquire(timeout=timeout):
+            return False
+        t_remaining = timeout - (time() - t_start)
+
+        if timeout < 0:
+            t_remaining = -1
+        elif t_remaining < 0:
+            t_remaining = 0
+
+        # Acquire lock if first to acquire
+        if self.counter == 0:
+            if not self._lock.acquire(timeout=t_remaining):
+                self._counter_lock.release()
+                return False
+        self.counter += 1
+
+        self._counter_lock.release()
+        return True
 
     def release(self):
         """Release the LightSwitch by decrementing the internal counter.

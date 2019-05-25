@@ -1,4 +1,4 @@
-import threading
+from threading import Lock, Thread
 from lox import LightSwitch
 from copy import copy
 from time import sleep, time
@@ -14,9 +14,9 @@ resource = None
 def common_setup():
     global common_lock, counting_lock, resp_lock
 
-    common_lock = threading.Lock()
+    common_lock = Lock()
     counting_lock = LightSwitch(common_lock)
-    resp_lock = threading.Lock()
+    resp_lock = Lock()
 
 def test_LightSwitch_1():
     global common_lock, counting_lock, resp_lock, resource
@@ -41,6 +41,13 @@ def test_LightSwitch_len():
     assert( 1==len(counting_lock) )
     counting_lock.release()
     assert( 0==len(counting_lock) )
+
+def test_LightSwitch_timeout():
+    lock = Lock()
+    ls = LightSwitch(lock)
+    lock.acquire()
+    assert False==ls.acquire(timeout=SLEEP_TIME)
+    assert False==ls.acquire(timeout=0)
 
 def test_bathroom_example():
     sol = [
@@ -69,7 +76,7 @@ def bathroom_example():
         A janitor needs to clean a restroom, but is not allowed to enter until
         all people are out of the restroom. How do we implement this?
     """
-    restroom_occupied = threading.Lock()
+    restroom_occupied = Lock()
     restroom = LightSwitch( restroom_occupied )
     res = []
     n_people = 5
@@ -94,8 +101,8 @@ def bathroom_example():
             res.append("p_%d_exit" % (id,))
             print("(%0.3f s) Person %d exited  the restroom" % ( time() - t_start, id,))
 
-    people_threads = [threading.Thread(target=people, args=(i,)) for i in range(n_people)]
-    janitor_thread = threading.Thread(target=janitor)
+    people_threads = [Thread(target=people, args=(i,)) for i in range(n_people)]
+    janitor_thread = Thread(target=janitor)
 
     for i, person in enumerate(people_threads):
         person.start()                 # Person i will now attempt to enter the restroom
