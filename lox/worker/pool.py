@@ -10,13 +10,13 @@ Example:
     >>> def foo(x,y):
     >>>     print("Foo: %d * %d" % (x,y))
     >>>     return x*y
-    >>>
+    >>> 
     >>> foo(1)
     Foo: 3 * 4
     12
     >>> for i in range(5):
     >>>     foo.scatter(i, i+1)
-    >>>
+    >>> 
     Foo: 0 * 1
     Foo: 1 * 2
     Foo: 2 * 3
@@ -168,13 +168,13 @@ def pool(max_workers, daemon=None):
         >>> def foo(x,y):
         >>>     print("Foo: %d * %d" % (x,y))
         >>>     return x*y
-        >>>
+        >>> 
         >>> foo(1)
         Foo: 3 * 4
         12
         >>> for i in range(5):
         >>>     foo.scatter(i, i+1)
-        >>>
+        >>> 
         Foo: 0 * 1
         Foo: 1 * 2
         Foo: 2 * 3
@@ -183,6 +183,23 @@ def pool(max_workers, daemon=None):
         >>> results = foo.gather()
         >>> print(results)
         [0, 2, 6, 12, 20]
+
+    Methods
+    -------
+    __call__( *args, **kwargs )
+        Vanilla passthrough function execution. Default user function behavior.
+
+    __len__()
+        Returns the current job queue length
+
+    scatter( *args, **kwargs)
+        Start a job executing func( *args, **kwargs ).
+        Workers are spun up automatically.
+        Obtain results via gather()
+
+    gather()
+        Block until all jobs called via scatter() are complete.
+        Returns a list of results in the order that scatter was invoked.
 
     Parameters
     ----------

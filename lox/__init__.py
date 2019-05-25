@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-"""Easy multithreading for every project."""
+"""
+Easy multithreading for every project.
+"""
 
 __author__ = """Brian Pugh"""
 __email__ = 'bnp117@gmail.com'

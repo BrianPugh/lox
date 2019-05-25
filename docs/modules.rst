@@ -2,11 +2,33 @@
 Modules
 =======
 
-.. automodule:: lox
+Worker
+------
+.. automodule:: lox.worker 
+
+Pool
+^^^^
+
+.. autoclass:: lox.worker.pool
    :members:
 
+Lock
+----
 .. automodule:: lox.lock
    :members:
 
-.. automodule:: lox.worker
+LightSwitch
+^^^^^^^^^^^
+.. autoclass:: lox.lock.LightSwitch
    :members:
+
+RWLock
+^^^^^^
+.. autoclass:: lox.lock.RWLock
+   :members:
+
+IndexSemaphore
+^^^^^^^^^^^^^^
+.. autoclass:: lox.lock.IndexSemaphore
+   :members:
+

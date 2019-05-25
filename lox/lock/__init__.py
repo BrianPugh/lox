@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-"""Advanced thread synchronization and resource management"""
+"""
+Concurrency control objects to help parallelized tasks communicate and share resources.
+"""
 
 from .light_switch import *
 from .rw_lock import *

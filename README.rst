@@ -20,7 +20,7 @@ lox
 
 
 
-Threading and Multiprocessing for every project.
+Threading made easy.
 
 
 * Free software: MIT license
