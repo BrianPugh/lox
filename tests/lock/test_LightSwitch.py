@@ -73,7 +73,7 @@ def bathroom_example():
     restroom = LightSwitch( restroom_occupied )
     res = []
     n_people = 5
-    sleep_time = 0.1
+    sleep_time = 0.2
 
     def janitor():
         with restroom_occupied: # block until the restroom is no longer occupied
@@ -102,7 +102,7 @@ def bathroom_example():
         sleep(sleep_time * 0.6)        # wait for 60% the time a person spends in the restroom
         if i==0:                       # While the first person is in the restroom...
             janitor_thread.start()     # the janitor would like to enter. HOWEVER...
-                                       # A new person (until all n_people are done) enters every 0.5 seconds.
+            print("(%0.3f s) Janitor Dispatched" % (time()-t_start))
     # Wait for all threads to finish
     for t in people_threads:
         t.join()
