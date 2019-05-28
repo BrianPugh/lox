@@ -3,4 +3,4 @@
 """Implement threading in less lines of code."""
 
 from .thread import *
-#from .process import *
+from .process import *

@@ -28,81 +28,41 @@ Example:
 """
 
 
-from multiprocessing import Pool, Queue
+from multiprocessing import Lock, Pool, Queue, cpu_count
+from .worker import WorkerWrapper
 
 __all__ = ['process',]
 
-class _ProcessWorker(threading.Thread):
-    def __init__(self):
-        pass
-    def run(self):
-        pass
-
-class _ProcessWrapper:
+class _ProcessWrapper(WorkerWrapper):
     """Process helper decorator
-
-    Methods
-    -------
-    __call__( *args, **kwargs )
-        Vanilla passthrough function execution. Default user function behavior.
-
-    __len__()
-        Returns the current job queue length
-
-    scatter( *args, **kwargs)
-        Start a job executing func( *args, **kwargs ).
-        Workers are spun up automatically.
-        Obtain results via gather()
-
-    gather()
-        Block until all jobs called via scatter() are complete.
-        Returns a list of results in the order that scatter was invoked.
     """
 
     def __init__(self, n_workers, func):
+        super().__init__(n_workers, func)
         self.pool = Pool(n_workers)
 
-        self.func       = func
-        self.__name__   = func.__name__
-        self.__doc__    = func.__doc__
-        self.__module__ = func.__module__
-
-        self.job_queue = Queue()
-
     def __len__(self):
-        """ Return length of job queue """
+        count = 0
+        for res in self.results:
+            if res.ready():
+                count += 1
 
-        return self.job_queue.qsize()
-
-
-    def __call__( *args, **kwargs ):
-        """ Vanilla execute the wrapped function"""
-
-        self.func( *args, **kwargs )
+        return count
 
     def scatter(self, *args, **kwargs):
         """Enqueue a job to be processed by workers.
         Spin up workers if necessary
         """
-        self.pool.apply_async(self.func, (**args, **kwargs))
-
-        # BELOW IS COPIED FROM THREADS
-
-        self.job_ls.acquire() # will block if currently gathering
-        self.response.append(None)
-        self.job_queue.put(Job(len(self.response)-1,
-                self.func, args, kwargs))
-        self._create_worker()
+        self.response.append(self.pool.apply_async(self.func, *args, **kwargs))
 
     def gather(self):
         """ Gather results. Blocks until job_queue is empty.
         Also blocks scatter on other processes.
         Returns list of results in order scatter'd
         """
-        with self.jobs_complete_lock: # Wait until all jobs are done
-            response = list(self.response)
-            self.response = deque()
-        return response
+        fetched = [x.get() for x in self.response]
+        self.response = deque()
+        return fetched
 
 def process(n_workers):
     """ Decorator to execute a function in multiple threads
@@ -149,13 +109,20 @@ def process(n_workers):
     Parameters
     ----------
     n_workers : int
-        Number of process workers to invoke.
+        Number of process workers to invoke. Defaults to number of CPU cores.
     """
 
     def wrapper(func):
-        return _ThreadWrapper(n_workers, func, daemon=daemon)
+        return _ProcessWrapper(max_workers, func, daemon=daemon)
 
-    return wrapper
+    if isinstance(max_workers, int):
+        # assume this is being called from decorator like "lox.thread(5)"
+        return wrapper
+    else:
+        # assume decorator with called as "lox.thread"
+        func = max_workers
+        n_workers = cpu_count()
+        return _ProcessWrapper(max_workers, func)
 
 if __name__ == '__main__':
     import doctest
