@@ -44,7 +44,7 @@ Easy Multithreading
 ^^^^^^^^^^^^^^^^^^^
 
     >>> import lox
-    >>> @lox.pool(3) # Maximum of 3 concurrent threads
+    >>> @lox.thread(3) # Maximum of 3 concurrent threads
     >>> def multiply(a,b):
     >>>    return a*b
     >>> multiply(3,4) # Function works as normal
