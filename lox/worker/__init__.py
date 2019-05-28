@@ -2,4 +2,4 @@
 
 """Implement threading in less lines of code."""
 
-from .pool import *
+from .thread import *

@@ -1,12 +1,12 @@
 """
-.. module:: pool
+.. module:: thread
    :synopsis: Easily execute a function in multiple threads.
 
 Calling the decorated function as normal will put it on a queue
 
 Example:
     >>> import lox
-    >>> @lox.pool(4) # Will operate with a maximum of 4 threads
+    >>> @lox.thread(4) # Will operate with a maximum of 4 threads
     >>> def foo(x,y):
     >>>     print("Foo: %d * %d" % (x,y))
     >>>     return x*y
@@ -35,13 +35,13 @@ from queue import Queue
 from functools import wraps
 from collections import namedtuple, deque
 
-__all__ = ["pool",]
+__all__ = ["thread",]
 
 Job = namedtuple('Job', ['index', 'func', 'args', 'kwargs',])
 Response = namedtuple('Response', ['index'])
 
-class _PoolWorker(threading.Thread):
-    """Thread worker created on-demand by _PoolWrapper
+class _ThreadWorker(threading.Thread):
+    """Thread worker created on-demand by _ThreadWrapper
     """
 
     def __init__(self, job_queue, res, worker_sem, lightswitch, **kwargs):
@@ -72,8 +72,8 @@ class _PoolWorker(threading.Thread):
         self.worker_sem.release() # indicate worker is terminated
         return
 
-class _PoolWrapper:
-    """Pool helper decorator
+class _ThreadWrapper:
+    """Thread helper decorator
 
     Methods
     -------
@@ -95,7 +95,7 @@ class _PoolWrapper:
 
     def __init__(self, max_workers, func, daemon=None):
         """
-        Creates the callable object for the 'pool' decorator
+        Creates the callable object for the 'thread' decorator
 
         Parameters
         ----------
@@ -136,7 +136,7 @@ class _PoolWrapper:
         """Create a worker if under maximum capacity"""
 
         if self.workers_sem.acquire(timeout=0):
-            _PoolWorker(self.job_queue, self.response, self.workers_sem, self.job_ls, daemon=self.daemon).start()
+            _ThreadWorker(self.job_queue, self.response, self.workers_sem, self.job_ls, daemon=self.daemon).start()
 
     def scatter(self, *args, **kwargs):
         """Enqueue a job to be processed by workers.
@@ -159,12 +159,12 @@ class _PoolWrapper:
             self.response = deque()
         return response
 
-def pool(max_workers, daemon=None):
+def thread(max_workers, daemon=None):
     """ Decorator to execute a function in multiple threads
 
     Example:
         >>> import lox
-        >>> @lox.pool(4) # Will operate with a maximum of 4 threads
+        >>> @lox.thread(4) # Will operate with a maximum of 4 threads
         >>> def foo(x,y):
         >>>     print("Foo: %d * %d" % (x,y))
         >>>     return x*y
@@ -210,7 +210,7 @@ def pool(max_workers, daemon=None):
     """
 
     def wrapper(func):
-        return _PoolWrapper(max_workers, func, daemon=daemon)
+        return _ThreadWrapper(max_workers, func, daemon=daemon)
 
     if isinstance(max_workers, int):
         # assume this is being called from decorator
@@ -218,7 +218,7 @@ def pool(max_workers, daemon=None):
     else:
         func = max_workers
         max_workers = 50
-        return _PoolWrapper(max_workers, func, daemon=daemon)
+        return _ThreadWrapper(max_workers, func, daemon=daemon)
 
 if __name__ == '__main__':
     import doctest

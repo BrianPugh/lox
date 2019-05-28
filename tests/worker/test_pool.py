@@ -9,7 +9,7 @@ def test_1():
     in_x = [1,   2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12,]
     in_y = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,]
 
-    @lox.pool(N_WORKERS) # specifying maximum number of threads
+    @lox.thread(N_WORKERS) # specifying maximum number of threads
     def worker_task(x,y):
         sleep(SLEEP_TIME)
         return x * y
@@ -30,7 +30,7 @@ def test_2():
     in_x = [1,   2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12,]
     in_y = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,]
 
-    @lox.pool # defaults to a max of 50 threads if none specified
+    @lox.thread # defaults to a max of 50 threads if none specified
     def worker_task(x,y):
         sleep(SLEEP_TIME)
         return x * y

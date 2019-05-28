@@ -6,10 +6,10 @@ Worker
 ------
 .. automodule:: lox.worker 
 
-Pool
+Thread
 ^^^^
 
-.. autofunction:: lox.worker.pool
+.. autofunction:: lox.worker.thread
 
 Lock
 ----
