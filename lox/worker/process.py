@@ -28,8 +28,9 @@ Example:
 """
 
 
-from multiprocessing import Lock, Pool, Queue, cpu_count
+import pathos.multiprocessing as mp
 from .worker import WorkerWrapper
+from collections import deque
 
 __all__ = ['process',]
 
@@ -39,12 +40,15 @@ class _ProcessWrapper(WorkerWrapper):
 
     def __init__(self, n_workers, func):
         super().__init__(n_workers, func)
-        self.pool = Pool(n_workers)
+        self.pool = mp.Pool(n_workers)
 
     def __len__(self):
+        """ Returns the number of jobs not yet completed
+        """
+
         count = 0
-        for res in self.results:
-            if res.ready():
+        for res in self.response:
+            if not res.ready():
                 count += 1
 
         return count
@@ -53,7 +57,7 @@ class _ProcessWrapper(WorkerWrapper):
         """Enqueue a job to be processed by workers.
         Spin up workers if necessary
         """
-        self.response.append(self.pool.apply_async(self.func, *args, **kwargs))
+        self.response.append(self.pool.apply_async(self.func, args=args, kwds=kwargs))
 
     def gather(self):
         """ Gather results. Blocks until job_queue is empty.
@@ -113,16 +117,16 @@ def process(n_workers):
     """
 
     def wrapper(func):
-        return _ProcessWrapper(max_workers, func, daemon=daemon)
+        return _ProcessWrapper(n_workers, func)
 
-    if isinstance(max_workers, int):
+    if isinstance(n_workers, int):
         # assume this is being called from decorator like "lox.thread(5)"
         return wrapper
     else:
         # assume decorator with called as "lox.thread"
-        func = max_workers
-        n_workers = cpu_count()
-        return _ProcessWrapper(max_workers, func)
+        func = n_workers
+        n_workers = mp.cpu_count()
+        return _ProcessWrapper(n_workers, func)
 
 if __name__ == '__main__':
     import doctest
