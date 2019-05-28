@@ -7,7 +7,7 @@ Worker
 .. automodule:: lox.worker 
 
 Thread
-^^^^
+^^^^^^
 
 .. autofunction:: lox.worker.thread
 

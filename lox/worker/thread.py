@@ -2,7 +2,7 @@
 .. module:: thread
    :synopsis: Easily execute a function in multiple threads.
 
-Calling the decorated function as normal will put it on a queue
+Still allows the decorated function as normal.
 
 Example:
     >>> import lox
@@ -28,27 +28,23 @@ Example:
 """
 
 import threading
-from lox import LightSwitch
-from threading import Lock, RLock, BoundedSemaphore
+from .worker import WorkerWrapper, Job
+from threading import Lock, BoundedSemaphore
 import queue
-from queue import Queue
-from functools import wraps
 from collections import namedtuple, deque
 
 __all__ = ["thread",]
 
-Job = namedtuple('Job', ['index', 'func', 'args', 'kwargs',])
-Response = namedtuple('Response', ['index'])
 
 class _ThreadWorker(threading.Thread):
     """Thread worker created on-demand by _ThreadWrapper
     """
 
     def __init__(self, job_queue, res, worker_sem, lightswitch, **kwargs):
-        self.job_queue = job_queue;
-        self.res = res
-        self.worker_sem = worker_sem
-        self.lightswitch = lightswitch
+        self.job_queue = job_queue; # Queue to pop jobs off of
+        self.res = res # deque object to place results in
+        self.worker_sem = worker_sem # object to "release()" upon worker destruction 
+        self.lightswitch = lightswitch # object to "release()" upon job completion
         super().__init__(**kwargs)
 
     def run(self, timeout=1):
@@ -66,98 +62,49 @@ class _ThreadWorker(threading.Thread):
                 job = self.job_queue.get(timeout=timeout)
                 self.res[job.index] = job.func(*job.args, **job.kwargs)
             except queue.Empty:
+                # Allow worker to self-terminate
                 break
             finally:
                 self.lightswitch.release() # indicate job complete
         self.worker_sem.release() # indicate worker is terminated
         return
 
-class _ThreadWrapper:
+class _ThreadWrapper(WorkerWrapper):
     """Thread helper decorator
-
-    Methods
-    -------
-    __call__( *args, **kwargs )
-        Vanilla passthrough function execution. Default user function behavior.
-
-    __len__()
-        Returns the current job queue length
-
-    scatter( *args, **kwargs)
-        Start a job executing func( *args, **kwargs ).
-        Workers are spun up automatically.
-        Obtain results via gather()
-
-    gather()
-        Block until all jobs called via scatter() are complete.
-        Returns a list of results in the order that scatter was invoked.
     """
 
-    def __init__(self, max_workers, func, daemon=None):
+    _lock_constructor = Lock
+    _queue_constructor = queue.Queue
+
+    def __init__(self, n_workers, func, daemon=None):
         """
         Creates the callable object for the 'thread' decorator
 
         Parameters
         ----------
-        max_workers : int
+        n_workers : int
             Maximum number of threads to invoke.
 
         func : function
             Function handle that each thread worker will execute
         """
-
-        self.workers_sem = BoundedSemaphore(max_workers)
-
-        self.func       = func
-        self.__name__   = func.__name__
-        self.__doc__    = func.__doc__
-        self.__module__ = func.__module__
-
-        self.daemon     = daemon
-
-        self.job_queue = Queue()
-
-        self.jobs_complete_lock = Lock()
-        self.job_ls = LightSwitch(self.jobs_complete_lock) # Used to determine if all jobs have been completed
-
-        self.response = deque() # Stores gather'd user function responses
-
-    def __call__(self, *args, **kwargs):
-        """ Vanilla execute the wrapped function"""
-
-        return self.func(*args, **kwargs)
-
-    def __len__(self):
-        """ Return length of job queue """
-
-        return self.job_queue.qsize()
+        super().__init__(n_workers, func)
+        self.workers_sem = BoundedSemaphore(self.n_workers)
+        self.daemon      = daemon
 
     def _create_worker(self):
         """Create a worker if under maximum capacity"""
 
         if self.workers_sem.acquire(timeout=0):
-            _ThreadWorker(self.job_queue, self.response, self.workers_sem, self.job_ls, daemon=self.daemon).start()
+            _ThreadWorker(self.job_queue, self.response, self.workers_sem, self.job_lightswitch, daemon=self.daemon).start()
 
     def scatter(self, *args, **kwargs):
         """Enqueue a job to be processed by workers.
         Spin up workers if necessary
         """
-
-        self.job_ls.acquire() # will block if currently gathering
-        self.response.append(None)
-        self.job_queue.put(Job(len(self.response)-1,
-                self.func, args, kwargs))
+        index = super().scatter(*args, **kwargs)
         self._create_worker()
-
-    def gather(self):
-        """ Gather results. Blocks until job_queue is empty.
-        Also blocks scatter on other threads.
-        Returns list of results in order scatter'd
-        """
-        with self.jobs_complete_lock: # Wait until all jobs are done
-            response = list(self.response)
-            self.response = deque()
-        return response
+        return index
 
 def thread(max_workers, daemon=None):
     """ Decorator to execute a function in multiple threads
@@ -186,14 +133,14 @@ def thread(max_workers, daemon=None):
 
     Methods
     -------
-    __call__( \*args, \*\*kwargs )
+    __call__( *args, **kwargs )
         Vanilla passthrough function execution. Default user function behavior.
 
     __len__()
         Returns the current job queue length
 
-    scatter( \*args, \*\*kwargs)
-        Start a job executing func( \*args, \*\*kwargs ).
+    scatter( *args, **kwargs)
+        Start a job executing func( *args, **kwargs ).
         Workers are spun up automatically.
         Obtain results via gather()
 
@@ -213,12 +160,13 @@ def thread(max_workers, daemon=None):
         return _ThreadWrapper(max_workers, func, daemon=daemon)
 
     if isinstance(max_workers, int):
-        # assume this is being called from decorator
+        # assume this is being called from decorator like "lox.thread(5)"
         return wrapper
     else:
+        # assume decorator with called as "lox.thread"
         func = max_workers
         max_workers = 50
-        return _ThreadWrapper(max_workers, func, daemon=daemon)
+        return _ThreadWrapper(max_workers, func)
 
 if __name__ == '__main__':
     import doctest
