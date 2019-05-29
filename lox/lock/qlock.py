@@ -8,6 +8,9 @@
 from threading import Lock
 from collections import deque
 
+__all__ = ["QLock", ]
+
+
 class QLock:
     """FIFO Lock
     Modified from https://stackoverflow.com/a/19695878
@@ -82,7 +85,7 @@ class QLock:
                 self.lock.release()
 
                 # Block until the lock has been released from another thread
-                acquired = lock.acquire( timeout=timeout )
+                acquired = lock.acquire(timeout=timeout)
                 self.lock.acquire()
                 if acquired:
                     # lock acquired
@@ -115,4 +118,3 @@ class QLock:
             self.count -= 1
             if self.queue:
                 self.queue.popleft().release()
-

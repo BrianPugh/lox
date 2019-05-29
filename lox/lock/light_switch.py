@@ -11,7 +11,8 @@ See https://w3.cs.jmu.edu/kirkpams/OpenCSF/Books/cs361/html/DesignAdv.html
 from threading import RLock
 from time import time
 
-__all__ = ["LightSwitch",]
+__all__ = ["LightSwitch", ]
+
 
 class LightSwitch:
     """Acquires a provided lock while LightSwitch is in use.
@@ -137,4 +138,3 @@ class LightSwitch:
             self.counter -= 1
             if self.counter == 0:
                 self._lock.release()
-

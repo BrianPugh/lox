@@ -9,14 +9,16 @@ from threading import Lock
 from contextlib import contextmanager
 from . import LightSwitch
 
-__all__ = ["RWLock",]
+__all__ = ["RWLock", ]
+
 
 class RWLock:
     """Lock for a Multi-Reader-Single-Writer scenario.
 
     Unlimited numbers of reader can obtain the lock, but as soon as a writer
-    attempts to acquire the lock, all reads are blocked until the current readers
-    are finished, the writer acquires the lock, and finally releases it.
+    attempts to acquire the lock, all reads are blocked until the current
+    readers are finished, the writer acquires the lock, and finally 
+    releases it.
 
     Attributes
     ----------

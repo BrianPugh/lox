@@ -34,7 +34,7 @@ import queue
 from collections import namedtuple, deque
 from lox import LightSwitch
 
-__all__ = ["thread",]
+__all__ = ["thread", ]
 
 """ Elements on the Job Queue
 
@@ -56,9 +56,9 @@ class _ThreadWorker(threading.Thread):
     """
 
     def __init__(self, job_queue, res, worker_sem, lightswitch, **kwargs):
-        self.job_queue = job_queue; # Queue to pop jobs off of
-        self.res = res # deque object to place results in
-        self.worker_sem = worker_sem # object to "release()" upon worker destruction 
+        self.job_queue   = job_queue   # Queue to pop jobs off of
+        self.res         = res         # deque object to place results in
+        self.worker_sem  = worker_sem  # object to "release()" upon worker destruction 
         self.lightswitch = lightswitch # object to "release()" upon job completion
         super().__init__(**kwargs)
 
@@ -125,6 +125,7 @@ class _ThreadWrapper(WorkerWrapper):
         """Enqueue a job to be processed by workers.
         Spin up workers if necessary
         """
+
         self.job_lightswitch.acquire() # will block if currently gathering
         index = len(self.response)
         self.response.append(None)

@@ -5,11 +5,11 @@
 .. moduleauthor:: Brian Pugh <bnp117@gmail.com>
 """
 
-from threading import Lock
 from queue import Queue, Empty, Full
 from contextlib import contextmanager
 
-__all__ = ["IndexSemaphore",]
+__all__ = ["IndexSemaphore", ]
+
 
 class IndexSemaphore:
     """ BoundedSemaphore where acquires return an index from [0, val)
@@ -111,4 +111,3 @@ class IndexSemaphore:
             self.queue.put_nowait(index)
         except Full:
             raise Exception("IndexSemaphore released more times than acquired")
-
