@@ -5,25 +5,22 @@
 Still allows the decorated function as normal.
 
 Example:
+
+.. doctest::
+
     >>> import lox
+    >>>
     >>> @lox.thread(4) # Will operate with a maximum of 4 threads
-    >>> def foo(x,y):
-    >>>     print("Foo: %d * %d" % (x,y))
-    >>>     return x*y
-    >>> 
-    >>> foo(1)
-    Foo: 3 * 4
+    ... def foo(x,y):
+    ...     return x*y
+    >>> foo(3,4)
     12
     >>> for i in range(5):
-    >>>     foo.scatter(i, i+1)
-    >>> 
-    Foo: 0 * 1
-    Foo: 1 * 2
-    Foo: 2 * 3
-    Foo: 3 * 4
-    Foo: 4 * 5
-    >>> results = foo.gather()
-    >>> print(results)
+    ...     foo.scatter(i, i+1)
+    -ignore-
+    >>> # foo is currently being executed in 4 threads
+    >>> results = foo.gather() # block until results are ready
+    >>> print(results) # Results are in the same order as scatter() calls
     [0, 2, 6, 12, 20]
 """
 
@@ -124,6 +121,10 @@ class _ThreadWrapper(WorkerWrapper):
     def scatter(self, *args, **kwargs):
         """Enqueue a job to be processed by workers.
         Spin up workers if necessary
+        
+        Return
+        ------
+            Index into the subsequent gather() results
         """
 
         self.job_lightswitch.acquire() # will block if currently gathering
@@ -144,23 +145,20 @@ def thread(max_workers, daemon=None):
     """ Decorator to execute a function in multiple threads
 
     Example:
+
+.. doctest::
+
         >>> import lox
-        >>> @lox.thread(4) # Will operate with a maximum of 4 threads
-        >>> def foo(x,y):
-        >>>     print("Foo: %d * %d" % (x,y))
-        >>>     return x*y
         >>> 
-        >>> foo(1)
-        Foo: 3 * 4
+        >>> @lox.thread(4) # Will operate with a maximum of 4 threads
+        ... def foo(x,y):
+        ...     return x*y
+        >>> foo(3,4)
         12
         >>> for i in range(5):
-        >>>     foo.scatter(i, i+1)
-        >>> 
-        Foo: 0 * 1
-        Foo: 1 * 2
-        Foo: 2 * 3
-        Foo: 3 * 4
-        Foo: 4 * 5
+        ...     foo.scatter(i, i+1)
+        -ignore-
+        >>> # foo is currently being executed in 4 threads
         >>> results = foo.gather()
         >>> print(results)
         [0, 2, 6, 12, 20]

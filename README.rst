@@ -43,15 +43,20 @@ Usage
 Easy Multithreading
 ^^^^^^^^^^^^^^^^^^^
 
+.. doctest::
+
     >>> import lox
-    >>> @lox.thread(3) # Maximum of 3 concurrent threads
-    >>> def multiply(a,b):
-    >>>    return a*b
-    >>> multiply(3,4) # Function works as normal
+    >>>
+    >>> @lox.thread(4) # Will operate with a maximum of 4 threads
+    ... def foo(x,y):
+    ...     return x*y
+    >>> foo(3,4)
     12
-    >>> xs = [1,2,3,4,5,]
-    >>> ys = [6,7,7,8,9,]
-    >>> [multiply.scatter(x,y) for x,y in zip(xs,ys)] 
-    >>> multiply.gather()
-    [ 6, 14, 21, 32, 45 ]
+    >>> for i in range(5):
+    ...     foo.scatter(i, i+1)
+    -ignore-
+    >>> # foo is currently being executed in 4 threads
+    >>> results = foo.gather() # block until results are ready
+    >>> print(results) # Results are in the same order as scatter() calls
+    [0, 2, 6, 12, 20]
 

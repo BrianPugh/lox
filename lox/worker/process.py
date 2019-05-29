@@ -5,26 +5,24 @@
 Calling the decorated function as normal will put it on a queue
 
 Example:
-    >>> import lox
-    >>> @lox.process(4) # Will operate with a maximum of 4 processes
-    >>> def foo(x,y):
-    >>>     print("Foo: %d * %d" % (x,y))
-    >>>     return x*y
-    >>> 
-    >>> foo(1)
-    Foo: 3 * 4
-    12
-    >>> for i in range(5):
-    >>>     foo.scatter(i, i+1)
-    >>> 
-    Foo: 0 * 1
-    Foo: 1 * 2
-    Foo: 2 * 3
-    Foo: 3 * 4
-    Foo: 4 * 5
-    >>> results = foo.gather()
-    >>> print(results)
-    [0, 2, 6, 12, 20]
+
+    .. doctest::
+        :skipif: True
+
+        >>> import lox
+        >>> 
+        >>> @lox.process(4) # Will operate with a maximum of 4 processes
+        ... def foo(x,y):
+        ...     return x*y
+        >>> foo(3,4)
+        12
+        >>> for i in range(5):
+        ...     foo.scatter(i, i+1)
+        >>> # foo is currently being executed in 4 processes
+        >>> results = foo.gather()
+        >>> print(results)
+        [0, 2, 6, 12, 20]
+
 """
 
 
@@ -72,23 +70,20 @@ def process(n_workers):
     """ Decorator to execute a function in multiple processes
 
     Example:
+
+    .. doctest::
+        :skipif: True
+
         >>> import lox
-        >>> @lox.process(4) # Will operate with a maximum of 4 processes
-        >>> def foo(x,y):
-        >>>     print("Foo: %d * %d" % (x,y))
-        >>>     return x*y
         >>> 
-        >>> foo(1)
-        Foo: 3 * 4
+        >>> @lox.process(4) # Will operate with a maximum of 4 processes
+        ... def foo(x,y):
+        ...     return x*y
+        >>> foo(3,4)
         12
         >>> for i in range(5):
-        >>>     foo.scatter(i, i+1)
-        >>> 
-        Foo: 0 * 1
-        Foo: 1 * 2
-        Foo: 2 * 3
-        Foo: 3 * 4
-        Foo: 4 * 5
+        ...     foo.scatter(i, i+1)
+        >>> # foo is currently being executed in 4 processes
         >>> results = foo.gather()
         >>> print(results)
         [0, 2, 6, 12, 20]

@@ -20,6 +20,7 @@
 #
 import os
 import sys
+import doctest
 sys.path.insert(0, os.path.abspath('..'))
 
 import lox
@@ -36,6 +37,7 @@ extensions = [
         'sphinx.ext.autodoc',
         'sphinx.ext.viewcode',
         'sphinx.ext.napoleon',
+        'sphinx.ext.doctest',
         ]
 
 napoleon_google_docstring = True
@@ -49,6 +51,14 @@ napoleon_use_admonition_for_references = False
 napoleon_use_ivar = False
 napoleon_use_param = True
 napoleon_use_rtype = True
+
+doctest_global_setup = """
+import lox
+"""
+
+doctest.ELLIPSIS_MARKER = '-ignore-' # monkeypatch to play nicely with sphinx
+
+#doctest_default_flags = doctest.ELLIPSIS 
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
