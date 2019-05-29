@@ -8,7 +8,8 @@ See https://w3.cs.jmu.edu/kirkpams/OpenCSF/Books/cs361/html/DesignAdv.html
 
 """
 
-from threading import RLock
+import threading
+import pathos.multiprocessing as mp
 from time import time
 
 __all__ = ["LightSwitch", ]
@@ -45,19 +46,24 @@ class LightSwitch:
         the provided lock.
     """
 
-    def __init__(self, lock):
+    def __init__(self, lock, multiprocessing=False):
         """Create a LightSwitch object.
 
         Parameters
         ----------
-        lock : threading.Lock
+        lock : threading.Lock or pathos.multiprocessing.Lock
             Lock to acquire when internal counter is incremented from zero.
             Lock to release when internal counter is decremented to zero.
         """
 
+        if multiprocessing:
+            self._library = mp
+        else:
+            self._library = threading
+
         self.lock = lock
         self.counter = 0
-        self._counter_lock = RLock()
+        self._counter_lock = self._library.Lock()
 
     @property
     def lock(self):
