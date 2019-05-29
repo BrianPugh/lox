@@ -11,6 +11,11 @@ Thread
 
 .. autofunction:: lox.worker.thread
 
+Process
+^^^^^^^
+
+.. autofunction:: lox.worker.process
+
 Lock
 ----
 .. automodule:: lox.lock

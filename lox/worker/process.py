@@ -69,11 +69,11 @@ class _ProcessWrapper(WorkerWrapper):
         return fetched
 
 def process(n_workers):
-    """ Decorator to execute a function in multiple threads
+    """ Decorator to execute a function in multiple processes
 
     Example:
         >>> import lox
-        >>> @lox.process(4) # Will operate with a maximum of 4 threads
+        >>> @lox.process(4) # Will operate with a maximum of 4 processes
         >>> def foo(x,y):
         >>>     print("Foo: %d * %d" % (x,y))
         >>>     return x*y
@@ -120,10 +120,10 @@ def process(n_workers):
         return _ProcessWrapper(n_workers, func)
 
     if isinstance(n_workers, int):
-        # assume this is being called from decorator like "lox.thread(5)"
+        # assume this is being called from decorator like "lox.process(5)"
         return wrapper
     else:
-        # assume decorator with called as "lox.thread"
+        # assume decorator with called as "lox.process"
         func = n_workers
         n_workers = mp.cpu_count()
         return _ProcessWrapper(n_workers, func)
