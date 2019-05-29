@@ -5,7 +5,7 @@ from time import sleep, time
 SLEEP_TIME = 0.01
 N_WORKERS = 5
 
-def test_1():
+def test_basic_args():
     in_x = [1,   2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12,]
     in_y = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,]
 
@@ -26,7 +26,7 @@ def test_1():
     for r,x,y in zip(res, in_x, in_y):
         assert( (x*y) == r )
 
-def test_2():
+def test_basic_noargs():
     in_x = [1,   2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12,]
     in_y = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,]
 
