@@ -35,7 +35,7 @@ class LightSwitch:
 
     Methods
     -------
-    acquire()
+    acquire(timeout=-1)
         Acquire the LightSwitch and increment the internal counter.
         When the internal counter is incremented from zero, it will acquire
         the provided lock.

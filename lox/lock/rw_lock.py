@@ -84,15 +84,33 @@ class RWLock:
             True if lock was acquired, False otherwise
         """
 
+        obtained = False
         rw_flag = self._check_rw_flag(rw_flag)
         if rw_flag == 'r':
-            with self._readers_queue:
-                with self._no_readers:
-                    self.read_counter.acquire()
+            # Will block briefly only if another thread is calling acquire('r') at the same time
+            obtained = self._readers_queue.acquire(timeout=timeout)
+            if not obtained:
+                return False
+
+            # Will block if a write is queued
+            obtained = self._no_readers.acquire(timeout=timeout)
+            if not obtained:
+                self._readers_queue.release()
+                return False
+
+            obtained = self.read_counter.acquire(timeout=timeout)
+
+            self._no_readers.release()
+            self._readers_queue.release()
         elif rw_flag == 'w':
-            self._write_counter.acquire()
-            self._no_writers.acquire()
-        return True
+            obtained = self._write_counter.acquire(timeout=timeout)
+            if not obtained:
+                return False
+
+            obtained = self._no_writers.acquire(timeout=timeout)
+            if not obtained:
+                self._write_counter.release()
+        return obtained
 
     def release(self, rw_flag:str):
         """Release acquired lock

@@ -93,6 +93,21 @@ def test_RWLock_rw():
     for r,s in zip(resp, soln):
         assert( r == s )
 
+def test_RWLock_timeout():
+    lock = RWLock();
+
+    assert True == lock.acquire('r', timeout=0.01)
+    assert False == lock.acquire('w', timeout=0.01)
+    assert True == lock.acquire('r', timeout=0.01)
+    lock.release('r')
+    lock.release('r')
+
+    assert True == lock.acquire('w', timeout=0.01)
+    assert False == lock.acquire('w', timeout=0.01)
+    assert False == lock.acquire('r', timeout=0.01)
+    lock.release('w')
+   
+
 def test_bathroom_example():
     # Note: after the janitor exits, the remaining people are nondeterministic
     sol = [
