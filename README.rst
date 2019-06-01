@@ -42,8 +42,6 @@ Usage
 Easy Multithreading
 ^^^^^^^^^^^^^^^^^^^
 
-.. doctest::
-
     >>> import lox
     >>>
     >>> @lox.thread(4) # Will operate with a maximum of 4 threads
