@@ -87,12 +87,10 @@ class RWLock:
         obtained = False
         rw_flag = self._check_rw_flag(rw_flag)
         if rw_flag == 'r':
-            # Will block briefly only if another thread is calling acquire('r') at the same time
             obtained = self._readers_queue.acquire(timeout=timeout)
             if not obtained:
                 return False
 
-            # Will block if a write is queued
             obtained = self._no_readers.acquire(timeout=timeout)
             if not obtained:
                 self._readers_queue.release()
