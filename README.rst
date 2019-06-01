@@ -13,7 +13,6 @@ lox
         :target: https://lox.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
-
 .. image:: https://pyup.io/repos/github/BrianPugh/lox/shield.svg
      :target: https://pyup.io/repos/github/BrianPugh/lox/
      :alt: Updates

@@ -134,7 +134,7 @@ def bathroom_example():
     # Note that multiple people can be in the restroom.
     # If people kept using the restroom, the Janitor would never be able
     # to enter (technically known as thread starvation).
-    # If this is undesired for your application, look at OneWriterManyReader
+    # If this is undesired for your application, look at RWLock
 
     return res
 
