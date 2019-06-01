@@ -26,7 +26,7 @@ class QLock:
     __len__()
         Returns the length of the queue.
 
-    acquire(timeout=None)
+    acquire(timeout=-1)
         Acquire the lock.
 
     release()

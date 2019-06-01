@@ -77,7 +77,7 @@ class RWLock:
             Either 'r' for 'read' or 'w' for 'write' acquire.
 
         timeout : float
-            TODO: Time in seconds before timeout occurs for acquiring lock.
+            Time in seconds before timeout occurs for acquiring lock.
 
         Returns
         -------
