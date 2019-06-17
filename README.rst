@@ -32,9 +32,12 @@ Installation
 Features
 --------
 
-* Powerful, intuitive multithreading in just 2 additional lines of code
+* **Multithreading**: Powerful, intuitive multithreading in just 2 additional lines of code.
 
-* Advanced thread synchronization, communication, and resource management tools
+* **Multiprocessing**: Truly parallel function execution with the same interface as **multithreading**.
+
+* **Synchronization**: Advanced thread synchronization, communication, and resource management tools.
+
 
 Usage
 --------
