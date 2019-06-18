@@ -32,11 +32,6 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     description="Threading and Multiprocessing for every project.",
-    entry_points={
-        'console_scripts': [
-            'lox=lox.cli:main',
-        ],
-    },
     install_requires=requirements,
     license="MIT license",
     long_description=readme + '\n\n' + history,

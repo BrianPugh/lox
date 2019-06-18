@@ -2,6 +2,11 @@
 History
 =======
 
+0.3.2 (2019-06-17)
+------------------
+
+* Fix manifest for installation from wheel
+
 0.3.1 (2019-06-17)
 ------------------
 
