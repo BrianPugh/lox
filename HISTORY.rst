@@ -2,6 +2,10 @@
 History
 =======
 
+0.3.3 (2019-06-19)
+------------------
+* Fix bug where thread in scatter of lox.thread double releases on empty queue
+
 0.3.2 (2019-06-17)
 ------------------
 

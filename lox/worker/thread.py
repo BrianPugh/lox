@@ -55,7 +55,7 @@ class _ThreadWorker(threading.Thread):
     def __init__(self, job_queue, res, worker_sem, lightswitch, **kwargs):
         self.job_queue   = job_queue   # Queue to pop jobs off of
         self.res         = res         # deque object to place results in
-        self.worker_sem  = worker_sem  # object to "release()" upon worker destruction 
+        self.worker_sem  = worker_sem  # object to "release()" upon worker destruction
         self.lightswitch = lightswitch # object to "release()" upon job completion
         super().__init__(**kwargs)
 
@@ -72,12 +72,15 @@ class _ThreadWorker(threading.Thread):
         while True:
             try:
                 job = self.job_queue.get(timeout=timeout)
-                self.res[job.index] = job.func(*job.args, **job.kwargs)
+                try:
+                    self.res[job.index] = job.func(*job.args, **job.kwargs)
+                except:
+                    pass
+                finally:
+                    self.lightswitch.release() # indicate job complete
             except queue.Empty:
                 # Allow worker to self-terminate
                 break
-            finally:
-                self.lightswitch.release() # indicate job complete
         self.worker_sem.release() # indicate worker is terminated
         return
 
@@ -121,7 +124,7 @@ class _ThreadWrapper(WorkerWrapper):
     def scatter(self, *args, **kwargs):
         """Enqueue a job to be processed by workers.
         Spin up workers if necessary
-        
+
         Return
         ------
             Index into the subsequent gather() results
@@ -149,7 +152,7 @@ def thread(max_workers, daemon=None):
 .. doctest::
 
         >>> import lox
-        >>> 
+        >>>
         >>> @lox.thread(4) # Will operate with a maximum of 4 threads
         ... def foo(x,y):
         ...     return x*y
