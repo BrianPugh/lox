@@ -2,6 +2,10 @@
 History
 =======
 
+0.3.4 (2019-06-20)
+------------------
+* Print traceback in red when a thread crashes
+
 0.3.3 (2019-06-19)
 ------------------
 * Fix bug where thread in scatter of lox.thread double releases on empty queue

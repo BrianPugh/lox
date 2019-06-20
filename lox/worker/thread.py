@@ -25,6 +25,7 @@ Example:
 """
 
 import threading
+import traceback
 from .worker import WorkerWrapper
 from threading import Lock, BoundedSemaphore
 import queue
@@ -74,8 +75,8 @@ class _ThreadWorker(threading.Thread):
                 job = self.job_queue.get(timeout=timeout)
                 try:
                     self.res[job.index] = job.func(*job.args, **job.kwargs)
-                except:
-                    pass
+                except Exception as e:
+                    print('\033[91m' + traceback.format_exc() + '\033[0m')
                 finally:
                     self.lightswitch.release() # indicate job complete
             except queue.Empty:
