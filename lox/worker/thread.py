@@ -1,8 +1,8 @@
 """
 .. module:: thread
-   :synopsis: Easily execute a function in multiple threads.
+   :synopsis: Easily execute a function or method in multiple threads.
 
-Still allows the decorated function as normal.
+Still allows the decorated function/method as normal.
 
 Example:
 
@@ -177,12 +177,12 @@ def thread(max_workers, daemon=None):
         Returns the current job queue length
 
     scatter( *args, **kwargs)
-        Start a job executing func( *args, **kwargs ).
+        Start a job executing `func( *args, **kwargs )`.
         Workers are spun up automatically.
-        Obtain results via gather()
+        Obtain results via `gather()`.
 
     gather()
-        Block until all jobs called via scatter() are complete.
+        Block until all jobs called via `scatter()` are complete.
         Returns a list of results in the order that scatter was invoked.
 
     Parameters

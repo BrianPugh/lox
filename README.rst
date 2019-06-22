@@ -18,16 +18,20 @@ lox
      :alt: Updates
 
 
-Threading made easy.
+Threading and multiprocessing made easy.
 
 
 * Free software: MIT license
 * Documentation: https://lox.readthedocs.io.
 
+
+**Lox** provides decorators and synchronization primitives to quickly add 
+concurrency to your projects.
+
 Installation
 ------------
 
-    pip install lox
+    pip3 install --user lox
 
 Features
 --------
@@ -50,12 +54,30 @@ Easy Multithreading
     >>> @lox.thread(4) # Will operate with a maximum of 4 threads
     ... def foo(x,y):
     ...     return x*y
-    >>> foo(3,4)
+    >>> foo(3,4) # normal function calls still work
     12
     >>> for i in range(5):
     ...     foo.scatter(i, i+1)
     -ignore-
     >>> # foo is currently being executed in 4 threads
+    >>> results = foo.gather() # block until results are ready
+    >>> print(results) # Results are in the same order as scatter() calls
+    [0, 2, 6, 12, 20]
+
+Easy Multiprocessing
+^^^^^^^^^^^^^^^^^^^^
+
+    >>> import lox
+    >>>
+    >>> @lox.process(4) # Will operate with a pool of 4 processes
+    ... def foo(x,y):
+    ...     return x*y
+    >>> foo(3,4) # normal function calls still work
+    12
+    >>> for i in range(5):
+    ...     foo.scatter(i, i+1)
+    -ignore-
+    >>> # foo is currently being executed in 4 processes
     >>> results = foo.gather() # block until results are ready
     >>> print(results) # Results are in the same order as scatter() calls
     [0, 2, 6, 12, 20]

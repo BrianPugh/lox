@@ -1,8 +1,8 @@
 """
 .. module:: process
-   :synopsis: Easily execute a function in multiple processes.
+   :synopsis: Easily execute a function or method in multiple processes.
 
-Calling the decorated function as normal will put it on a queue
+Still allows the decorated function/method as normal.
 
 Example:
 
@@ -29,6 +29,7 @@ Example:
 import pathos.multiprocessing as mp
 from .worker import WorkerWrapper
 from collections import deque
+from lox.helper import auto_adapt_to_methods, MethodDecoratorAdaptor
 
 __all__ = ['process',]
 
@@ -36,7 +37,9 @@ class _ProcessWrapper(WorkerWrapper):
     """Process helper decorator
     """
 
-    def __init__(self, n_workers, func):
+    def __init__(self, func, n_workers=None):
+        if n_workers is None:
+            n_workers = mp.cpu_count()
         super().__init__(n_workers, func)
         self.pool = mp.Pool(n_workers)
 
@@ -90,19 +93,19 @@ def process(n_workers):
 
     Methods
     -------
-    __call__( \*args, \*\*kwargs )
+    __call__( *args, **kwargs )
         Vanilla passthrough function execution. Default user function behavior.
 
     __len__()
         Returns the current job queue length
 
-    scatter( \*args, \*\*kwargs)
-        Start a job executing func( \*args, \*\*kwargs ).
+    scatter( *args, **kwargs )
+        Start a job executing `func( *args, **kwargs )`.
         Workers are spun up automatically.
-        Obtain results via gather()
+        Obtain results via `gather()`.
 
     gather()
-        Block until all jobs called via scatter() are complete.
+        Block until all jobs called via `scatter()` are complete.
         Returns a list of results in the order that scatter was invoked.
 
     Parameters
@@ -111,8 +114,9 @@ def process(n_workers):
         Number of process workers to invoke. Defaults to number of CPU cores.
     """
 
+    @auto_adapt_to_methods
     def wrapper(func):
-        return _ProcessWrapper(n_workers, func)
+        return _ProcessWrapper(func, n_workers=n_workers)
 
     if isinstance(n_workers, int):
         # assume this is being called from decorator like "lox.process(5)"
@@ -120,8 +124,7 @@ def process(n_workers):
     else:
         # assume decorator with called as "lox.process"
         func = n_workers
-        n_workers = mp.cpu_count()
-        return _ProcessWrapper(n_workers, func)
+        return MethodDecoratorAdaptor(_ProcessWrapper, func)
 
 if __name__ == '__main__':
     import doctest

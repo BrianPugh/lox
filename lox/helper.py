@@ -3,6 +3,7 @@
    :synopsis: Private general lox helper functions/classes
 """
 
+
 __all__ = ["auto_adapt_to_methods", "MethodDecoratorAdaptor"]
 
 class MethodDecoratorAdaptor:
