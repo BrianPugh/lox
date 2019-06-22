@@ -25,12 +25,13 @@ Example:
 """
 
 import threading
+import traceback
 from .worker import WorkerWrapper
 from threading import Lock, BoundedSemaphore
 import queue
 from collections import namedtuple, deque
 from lox import LightSwitch
-from lox.helper import auto_adapt_to_methods, MethodDecoratorAdaptor
+from lox.helper import auto_adapt_to_methods, MethodDecoratorAdaptor, term_colors
 
 __all__ = ["thread", ]
 
@@ -75,8 +76,8 @@ class _ThreadWorker(threading.Thread):
                 job = self.job_queue.get(timeout=timeout)
                 try:
                     self.res[job.index] = job.func(*job.args, **job.kwargs)
-                except:
-                    pass
+                except Exception as e:
+                    print(term_colors.FAIL + traceback.format_exc() + term_colors.ENDC)
                 finally:
                     self.lightswitch.release() # indicate job complete
             except queue.Empty:

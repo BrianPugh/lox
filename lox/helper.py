@@ -4,7 +4,7 @@
 """
 
 
-__all__ = ["auto_adapt_to_methods", "MethodDecoratorAdaptor"]
+__all__ = ["auto_adapt_to_methods", "MethodDecoratorAdaptor", "term_colors"]
 
 class MethodDecoratorAdaptor:
     """ Class that allows the same decorator apply to methods and functions """
@@ -42,3 +42,14 @@ def auto_adapt_to_methods(decorator):
     def adapt(func):
         return MethodDecoratorAdaptor(decorator, func)
     return adapt
+
+class term_colors:
+    """ Escape sequences to colorize text in the terminal """
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
