@@ -5,7 +5,7 @@
 
 __all__ = ["auto_adapt_to_methods", "MethodDecoratorAdaptor"]
 
-class MethodDecoratorAdaptor(object):
+class MethodDecoratorAdaptor:
     """ Class that allows the same decorator apply to methods and functions """
 
     def __init__(self, decorator, func):
@@ -25,6 +25,12 @@ class MethodDecoratorAdaptor(object):
 
     def __get__(self, instance, owner):
         return self.decorator(self.func.__get__(instance, owner))
+
+    def __getattr__(self, attr):
+        return getattr(self.decorator(self.func), attr)
+
+    def __len__(self,):
+        return len(self.decorator(self.func))
 
 def auto_adapt_to_methods(decorator):
     """Decorator that allows you to use the same decorator on methods and 
