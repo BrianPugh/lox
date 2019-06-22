@@ -77,7 +77,8 @@ class _ThreadWorker(threading.Thread):
                 try:
                     self.res[job.index] = job.func(*job.args, **job.kwargs)
                 except Exception as e:
-                    print(term_colors.FAIL + traceback.format_exc() + term_colors.ENDC)
+                    with term_colors("red"):
+                        print(traceback.format_exc())
                 finally:
                     self.lightswitch.release() # indicate job complete
             except queue.Empty:
