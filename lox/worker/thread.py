@@ -30,6 +30,7 @@ from threading import Lock, BoundedSemaphore
 import queue
 from collections import namedtuple, deque
 from lox import LightSwitch
+from lox.helper import auto_adapt_to_methods, MethodDecoratorAdaptor
 
 __all__ = ["thread", ]
 
@@ -88,17 +89,18 @@ class _ThreadWrapper(WorkerWrapper):
     """Thread helper decorator
     """
 
-    def __init__(self, n_workers, func, daemon=None):
+    def __init__(self, func, n_workers=50, daemon=None):
         """
         Creates the callable object for the 'thread' decorator
 
         Parameters
         ----------
+        func : function
+            Function handle that each thread worker will execute
+
         n_workers : int
             Maximum number of threads to invoke.
 
-        func : function
-            Function handle that each thread worker will execute
         """
         super().__init__(n_workers, func)
 
@@ -191,8 +193,9 @@ def thread(max_workers, daemon=None):
         and a default number of max_workers is used.
     """
 
+    @auto_adapt_to_methods
     def wrapper(func):
-        return _ThreadWrapper(max_workers, func, daemon=daemon)
+        return _ThreadWrapper(func, n_workers=max_workers, daemon=daemon)
 
     if isinstance(max_workers, int):
         # assume this is being called from decorator like "lox.thread(5)"
@@ -200,8 +203,7 @@ def thread(max_workers, daemon=None):
     else:
         # assume decorator with called as "lox.thread"
         func = max_workers
-        max_workers = 50
-        return _ThreadWrapper(max_workers, func)
+        return MethodDecoratorAdaptor(_ThreadWrapper, func)
 
 if __name__ == '__main__':
     import doctest

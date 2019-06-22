@@ -2,6 +2,11 @@
 History
 =======
 
+0.4.0 (2019-06-22)
+------------------
+* Semi-breaking change: **lox.thread** and **lox.process** now automatically pass
+  the object instance when decorating a method.
+
 0.3.3 (2019-06-19)
 ------------------
 * Fix bug where thread in scatter of lox.thread double releases on empty queue
