@@ -47,3 +47,28 @@ def test_basic_noargs():
     for r,x,y in zip(res, in_x, in_y):
         assert( (x*y) == r )
 
+class TestClass1:
+
+    def __init__(self):
+        pass
+
+    @lox.thread
+    def test_method(self, x, y):
+        sleep(SLEEP_TIME)
+        return x*y
+
+def test_method():
+    in_x = [1,   2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12,]
+    in_y = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,]
+
+    test_obj = TestClass1()
+
+    assert( 10 == test_obj.test_method(2,5) )
+
+    for x,y in zip(in_x, in_y):
+        test_obj.test_method.scatter(x,y)
+    res = test_obj.test_method.gather()
+
+    for r,x,y in zip(res, in_x, in_y):
+        assert( (x*y) == r )
+
