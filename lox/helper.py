@@ -4,7 +4,7 @@
 """
 
 
-__all__ = ["auto_adapt_to_methods", "MethodDecoratorAdaptor", "term_colors"]
+__all__ = ["auto_adapt_to_methods", "MethodDecoratorAdaptor", "term_colors",]
 
 class MethodDecoratorAdaptor:
     """ Class that allows the same decorator apply to methods and functions """
@@ -78,3 +78,4 @@ class term_colors:
 
     def __exit__(self, type, value, traceback):
         print(self.ENDC, end='', flush=True)
+

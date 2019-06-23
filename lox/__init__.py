@@ -10,3 +10,4 @@ __version__ = '0.4.0'
 
 from .lock import *
 from .worker import *
+from .exceptions import *

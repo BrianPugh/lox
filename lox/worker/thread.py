@@ -26,7 +26,7 @@ Example:
 
 import threading
 import traceback
-from .worker import WorkerWrapper
+from .worker import WorkerWrapper, ScatterPromise
 from threading import Lock, BoundedSemaphore
 import queue
 from collections import namedtuple, deque
@@ -48,14 +48,16 @@ args
 kwargs
     keyword arguments to feed into func
 """
-Job = namedtuple('Job', ['index', 'func', 'args', 'kwargs',])
+Job = namedtuple('Job', ['index', 'func', 'complete', 'args', 'kwargs',])
+Result = namedtuple('Result', ['index', 'value',])
 
 class _ThreadWorker(threading.Thread):
     """Thread worker created on-demand by _ThreadWrapper
     """
 
-    def __init__(self, job_queue, res, worker_sem, lightswitch, **kwargs):
+    def __init__(self, job_queue, res_queue, res, worker_sem, lightswitch, **kwargs):
         self.job_queue   = job_queue   # Queue to pop jobs off of
+        self.res_queue   = res_queue   # Queue to push results onto
         self.res         = res         # deque object to place results in
         self.worker_sem  = worker_sem  # object to "release()" upon worker destruction
         self.lightswitch = lightswitch # object to "release()" upon job completion
@@ -80,7 +82,11 @@ class _ThreadWorker(threading.Thread):
                     with term_colors("red"):
                         print(traceback.format_exc())
                 finally:
-                    self.lightswitch.release() # indicate job complete
+                    self.res_queue.put(Result(job.index, self.res[job.index]))
+
+                    # indicate job complete
+                    job.complete.release()
+                    self.lightswitch.release() 
             except queue.Empty:
                 # Allow worker to self-terminate
                 break
@@ -106,8 +112,8 @@ class _ThreadWrapper(WorkerWrapper):
         """
         super().__init__(n_workers, func)
 
-        # Queue to put jobs on
-        self.job_queue = queue.Queue()
+        self.job_queue = queue.Queue() # Queue to put jobs on
+        self.res_queue = queue.Queue() # Queue to put results on
         self.jobs_complete_lock = Lock()
         self.job_lightswitch = LightSwitch(self.jobs_complete_lock) # Used to determine if all jobs have been completed
 
@@ -123,7 +129,8 @@ class _ThreadWrapper(WorkerWrapper):
         """Create a worker if under maximum capacity"""
 
         if self.workers_sem.acquire(timeout=0):
-            _ThreadWorker(self.job_queue, self.response, self.workers_sem, self.job_lightswitch, daemon=self.daemon).start()
+            _ThreadWorker(self.job_queue, self.res_queue, self.response,
+                    self.workers_sem, self.job_lightswitch, daemon=self.daemon).start()
 
     def scatter(self, *args, **kwargs):
         """Enqueue a job to be processed by workers.
@@ -134,17 +141,23 @@ class _ThreadWrapper(WorkerWrapper):
             Index into the subsequent gather() results
         """
 
-        self.job_lightswitch.acquire() # will block if currently gathering
+        self.job_lightswitch.acquire()
         index = len(self.response)
         self.response.append(None)
-        self.job_queue.put(Job(index, self.func, args, kwargs))
-        self._create_worker()
-        return index
+        job_complete = Lock()
+        job_complete.acquire()
+        self.job_queue.put(Job(index, self.func, job_complete, args, kwargs))
+        self._create_worker() # Create a thread if we are not at capacity
+        promise = ScatterPromise(index, self.res_queue, job_complete, self.response)
+        return promise
 
     def gather(self):
         with self.jobs_complete_lock: # Wait until all jobs are done
             response = list(self.response)
+
+            # Clear internal results
             self.response = deque()
+            self.res_queue = queue.Queue()
         return response
 
 
