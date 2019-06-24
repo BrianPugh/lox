@@ -29,7 +29,7 @@ class MethodDecoratorAdaptor:
 
     def __get__(self, instance, owner):
         global cdfi
-        k = (self.decorator, self.func)
+        k = (instance, owner, self.decorator, self.func)
         if k not in cdfi:
             cdfi[k] = self.decorator(self.func.__get__(instance, owner))
         return cdfi[k]
