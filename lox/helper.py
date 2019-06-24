@@ -6,6 +6,9 @@
 
 __all__ = ["auto_adapt_to_methods", "MethodDecoratorAdaptor", "term_colors",]
 
+cdf = {}
+cdfi = {}
+
 class MethodDecoratorAdaptor:
     """ Class that allows the same decorator apply to methods and functions """
 
@@ -22,16 +25,29 @@ class MethodDecoratorAdaptor:
         self.func = func
 
     def __call__(self, *args, **kwargs):
-        return self.decorator(self.func)(*args, **kwargs)
+        return self._get_cdf()(*args, **kwargs)
 
     def __get__(self, instance, owner):
-        return self.decorator(self.func.__get__(instance, owner))
+        global cdfi
+        k = (self.decorator, self.func)
+        if k not in cdfi:
+            cdfi[k] = self.decorator(self.func.__get__(instance, owner))
+        return cdfi[k]
+
 
     def __getattr__(self, attr):
-        return getattr(self.decorator(self.func), attr)
+        return getattr(self._get_cdf(), attr)
 
     def __len__(self,):
-        return len(self.decorator(self.func))
+        return len(self._get_cdf())
+
+    def _get_cdf(self):
+        global cdf
+        k = (self.decorator, self.func)
+        if k not in cdf:
+            cdf[k] = self.decorator(self.func)
+        return cdf[k]
+
 
 def auto_adapt_to_methods(decorator):
     """Decorator that allows you to use the same decorator on methods and 

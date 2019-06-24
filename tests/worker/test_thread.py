@@ -17,11 +17,13 @@ def test_basic_args():
     # Vanilla function execution still works
     assert( 10 == worker_task(2,5) )
 
-    assert( len(worker_task) == 0 )
+    #assert( len(worker_task) == 0 )
 
     for x,y in zip(in_x, in_y):
         worker_task.scatter(x,y)
     res = worker_task.gather()
+
+    assert(len(res) == len(in_x))
 
     for r,x,y in zip(res, in_x, in_y):
         assert( (x*y) == r )
@@ -43,6 +45,8 @@ def test_basic_noargs():
     for x,y in zip(in_x, in_y):
         worker_task.scatter(x,y)
     res = worker_task.gather()
+
+    assert(len(res) == len(in_x))
 
     for r,x,y in zip(res, in_x, in_y):
         assert( (x*y) == r )
@@ -76,12 +80,16 @@ def test_method_1():
         test_obj.test_method1.scatter(x,y)
     res = test_obj.test_method1.gather()
 
+    assert(len(res) == len(in_x))
+
     for r,x,y in zip(res, in_x, in_y):
         assert( (x*y+z) == r )
 
     for x,y in zip(in_x, in_y):
         test_obj.test_method2.scatter(x,y)
     res = test_obj.test_method2.gather()
+
+    assert(len(res) == len(in_x))
 
     for r,x,y in zip(res, in_x, in_y):
         assert( (x*y+z) == r )

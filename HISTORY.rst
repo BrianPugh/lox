@@ -2,6 +2,10 @@
 History
 =======
 
+0.4.1 (2019-06-23)
+------------------
+* Fixed broken workers and unit tests for workers
+
 0.4.0 (2019-06-22)
 ------------------
 * Semi-breaking change: **lox.thread** and **lox.process** now automatically pass
