@@ -2,6 +2,7 @@ from lox.helper import term_colors
 
 def test_ctx(capsys):
     with capsys.disabled():
+        print("")
         with term_colors("red"):
             print("test red")
         with term_colors("green"):
