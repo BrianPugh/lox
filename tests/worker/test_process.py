@@ -24,6 +24,7 @@ def test_basic_args():
         worker_task.scatter(x,y)
 
     res = worker_task.gather()
+    assert(len(res) == len(in_x))
 
     for r,x,y in zip(res, in_x, in_y):
         assert( (x*y) == r )
@@ -47,6 +48,7 @@ def test_basic_noargs():
         worker_task.scatter(x,y)
 
     res = worker_task.gather()
+    assert(len(res) == len(in_x))
 
     for r,x,y in zip(res, in_x, in_y):
         assert( (x*y) == r )
@@ -79,6 +81,7 @@ def test_method_1():
     for x,y in zip(in_x, in_y):
         test_obj.test_method1.scatter(x,y)
     res = test_obj.test_method1.gather()
+    assert(len(res) == len(in_x))
 
     for r,x,y in zip(res, in_x, in_y):
         assert( (x*y+z) == r )
@@ -86,6 +89,7 @@ def test_method_1():
     for x,y in zip(in_x, in_y):
         test_obj.test_method2.scatter(x,y)
     res = test_obj.test_method2.gather()
+    assert(len(res) == len(in_x))
 
     for r,x,y in zip(res, in_x, in_y):
         assert( (x*y+z) == r )
