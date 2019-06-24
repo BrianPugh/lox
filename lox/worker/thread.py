@@ -61,7 +61,7 @@ class _ThreadWorker(threading.Thread):
         self.lightswitch = lightswitch # object to "release()" upon job completion
         super().__init__(**kwargs)
 
-    def run(self, timeout=1):
+    def run(self, ):
         """ Executes a Job and stores the results
 
         Parameters
@@ -73,7 +73,7 @@ class _ThreadWorker(threading.Thread):
 
         while True:
             try:
-                job = self.job_queue.get(timeout=timeout)
+                job = self.job_queue.get(timeout=0)
                 try:
                     self.res[job.index] = job.func(*job.args, **job.kwargs)
                 except Exception as e:

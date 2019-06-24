@@ -58,7 +58,6 @@ class Class1:
 
     @lox.thread(2)
     def test_method1(self, x, y):
-        print(self)
         sleep(SLEEP_TIME)
         return x*y + self.z
 
@@ -90,25 +89,25 @@ def test_method_1():
         for r,x,y in zip(res, in_x, in_y):
             assert( (x*y+z1) == r )
 
-        for x,y in zip(in_x, in_y):
-            test_obj_2.test_method1.scatter(x,y)
-        res = test_obj_2.test_method1.gather()
-        assert(len(res) == len(in_x))
-        for r,x,y in zip(res, in_x, in_y):
-            assert( (x*y+z2) == r )
+    for x,y in zip(in_x, in_y):
+        test_obj_2.test_method1.scatter(x,y)
+    res = test_obj_2.test_method1.gather()
+    assert(len(res) == len(in_x))
+    for r,x,y in zip(res, in_x, in_y):
+        assert( (x*y+z2) == r )
 
 
-        for x,y in zip(in_x, in_y):
-            test_obj_1.test_method2.scatter(x,y)
-        res = test_obj_1.test_method2.gather()
-        assert(len(res) == len(in_x))
-        for r,x,y in zip(res, in_x, in_y):
-            assert( (x*y+z1) == r )
+    for x,y in zip(in_x, in_y):
+        test_obj_1.test_method2.scatter(x,y)
+    res = test_obj_1.test_method2.gather()
+    assert(len(res) == len(in_x))
+    for r,x,y in zip(res, in_x, in_y):
+        assert( (x*y+z1) == r )
 
-        for x,y in zip(in_x, in_y):
-            test_obj_2.test_method2.scatter(x,y)
-        res = test_obj_2.test_method2.gather()
-        assert(len(res) == len(in_x))
-        for r,x,y in zip(res, in_x, in_y):
-            assert( (x*y+z2) == r )
+    for x,y in zip(in_x, in_y):
+        test_obj_2.test_method2.scatter(x,y)
+    res = test_obj_2.test_method2.gather()
+    assert(len(res) == len(in_x))
+    for r,x,y in zip(res, in_x, in_y):
+        assert( (x*y+z2) == r )
 
