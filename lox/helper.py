@@ -3,11 +3,24 @@
    :synopsis: Private general lox helper functions/classes
 """
 
+import sys
+import gc
+
 
 __all__ = ["auto_adapt_to_methods", "MethodDecoratorAdaptor", "term_colors"]
 
-cdf = {}
-cdfi = {}
+cdf = {} # cached (decorator, func)
+cdfi = {} # cached (instance, owner, decorator, func)
+
+def cdfi_gc_cb(phase, info):
+    """ Garbage Collector callback to free deleted cdfi entries"""
+
+    global cdfi
+    if phase == "start":
+        remove = [k for k,v in cdfi.items() if sys.getrefcount(v.func.__self__) <= 3]
+        for k in remove: del cdfi[k]
+
+gc.callbacks.append(cdfi_gc_cb)
 
 class MethodDecoratorAdaptor:
     """ Class that allows the same decorator apply to methods and functions """
@@ -33,7 +46,6 @@ class MethodDecoratorAdaptor:
         if k not in cdfi:
             cdfi[k] = self.decorator(self.func.__get__(instance, owner))
         return cdfi[k]
-
 
     def __getattr__(self, attr):
         return getattr(self._get_cdf(), attr)

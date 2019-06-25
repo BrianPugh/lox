@@ -64,7 +64,7 @@ class Class1:
     @lox.thread
     def test_method2(self, x, y):
         sleep(SLEEP_TIME)
-        return x*y + self.z
+        return x*y - self.z
 
 def test_method_1():
     in_x = [1,   2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12,]
@@ -76,10 +76,10 @@ def test_method_1():
     test_obj_2 = Class1( z2 )
 
     assert( (2*5+z1) == test_obj_1.test_method1(2,5) )
-    assert( (2*5+z1) == test_obj_1.test_method2(2,5) )
+    assert( (2*5-z1) == test_obj_1.test_method2(2,5) )
 
     assert( (2*5+z2) == test_obj_2.test_method1(2,5) )
-    assert( (2*5+z2) == test_obj_2.test_method2(2,5) )
+    assert( (2*5-z2) == test_obj_2.test_method2(2,5) )
 
     for i in range(2):
         for x,y in zip(in_x, in_y):
@@ -102,12 +102,12 @@ def test_method_1():
     res = test_obj_1.test_method2.gather()
     assert(len(res) == len(in_x))
     for r,x,y in zip(res, in_x, in_y):
-        assert( (x*y+z1) == r )
+        assert( (x*y-z1) == r )
 
     for x,y in zip(in_x, in_y):
         test_obj_2.test_method2.scatter(x,y)
     res = test_obj_2.test_method2.gather()
     assert(len(res) == len(in_x))
     for r,x,y in zip(res, in_x, in_y):
-        assert( (x*y+z2) == r )
+        assert( (x*y-z2) == r )
 
