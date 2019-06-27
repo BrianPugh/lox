@@ -2,6 +2,10 @@
 History
 =======
 
+0.4.3 (2019-06-24)
+------------------
+* Garbage collect cached decorated object methods
+
 0.4.2 (2019-06-23)
 ------------------
 * Fixed multiple instances and successive scatter and gather calls to wrapped methods
