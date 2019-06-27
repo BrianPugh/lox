@@ -24,16 +24,21 @@ Example:
     [0, 2, 6, 12, 20]
 """
 
+from collections import namedtuple, deque
+from threading import Lock, BoundedSemaphore
+import logging as log
+import queue
 import threading
 import traceback
-from .worker import WorkerWrapper, ScatterPromise
-from threading import Lock, BoundedSemaphore
-import queue
-from collections import namedtuple, deque
-from lox import LightSwitch
-from lox.helper import auto_adapt_to_methods, MethodDecoratorAdaptor, term_colors
+import sys
+from ..lock import LightSwitch
+from ..helper import auto_adapt_to_methods, MethodDecoratorAdaptor, term_colors
+from .worker import WorkerWrapper
 
 __all__ = ["thread", ]
+
+if "pytest" in sys.modules:
+    log.basicConfig(level=log.DEBUG)
 
 """ Elements on the Job Queue
 
@@ -77,6 +82,8 @@ class _ThreadWorker(threading.Thread):
             try:
                 job = self.job_queue.get(timeout=0)
                 try:
+                    log.debug("Executing decorated function with args %s and kwargs %s" \
+                            % (str(job.args), str(job.kwargs)))
                     self.res[job.index] = job.func(*job.args, **job.kwargs)
                 except Exception as e:
                     with term_colors("red"):
