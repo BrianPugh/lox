@@ -59,6 +59,7 @@ class _ProcessWrapper(WorkerWrapper):
         Spin up workers if necessary
         """
         self.response.append(self.pool.apply_async(self.func, args=args, kwds=kwargs))
+        return len(self.response)-1
 
     def gather(self):
         """ Gather results. Blocks until job_queue is empty.
@@ -91,27 +92,43 @@ def process(n_workers):
         >>> print(results)
         [0, 2, 6, 12, 20]
 
-    Methods
-    -------
-    __call__( *args, **kwargs )
-        Vanilla passthrough function execution. Default user function behavior.
-
-    __len__()
-        Returns the current job queue length
-
-    scatter( *args, **kwargs )
-        Start a job executing `func( *args, **kwargs )`.
-        Workers are spun up automatically.
-        Obtain results via `gather()`.
-
-    gather()
-        Block until all jobs called via `scatter()` are complete.
-        Returns a list of results in the order that scatter was invoked.
-
     Parameters
     ----------
     n_workers : int
         Number of process workers to invoke. Defaults to number of CPU cores.
+
+    Methods
+    -------
+    __call__( *args, **kwargs )
+        Vanilla passthrough function execution. Default user function behavior.
+        
+        Returns
+        -------
+        Decorated function return type.
+           Return of decorated function.
+
+    __len__()
+        Returns
+        -------
+        int
+            job queue length
+
+    scatter( *args, **kwargs )
+        Start a job executing ``func( *args, **kwargs )``.
+        Workers are created and destroyed automatically.
+
+        Returns
+        -------
+        int
+            Solution's index into the results obtained via ``gather()``.
+
+    gather()
+        Block until all jobs called via ``scatter()`` are complete.
+
+        Returns
+        -------
+        list
+            Results in the order that scatter was invoked.
     """
 
     @auto_adapt_to_methods
