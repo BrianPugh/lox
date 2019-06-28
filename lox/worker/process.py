@@ -35,9 +35,6 @@ from ..helper import auto_adapt_to_methods, MethodDecoratorAdaptor
 
 __all__ = ['process',]
 
-if "pytest" in sys.modules:
-    log.basicConfig(level=log.DEBUG)
-
 class _ProcessWrapper(WorkerWrapper):
     """Process helper decorator
     """

@@ -111,3 +111,22 @@ def test_method_1():
     for r,x,y in zip(res, in_x, in_y):
         assert( (x*y-z2) == r )
 
+def test_chaining_1():
+    in_x = [1,   2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12,]
+    in_y = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,]
+
+    @lox.thread(2)
+    def foo(x,y):
+        return x, x*y
+
+    @lox.thread(2)
+    def bar(x,y):
+        return x + y
+
+    for x,y in zip(in_x, in_y):
+        bar.scatter(foo.scatter(x,y))
+    res = bar.gather()
+    assert(len(res) == len(in_x))
+    for r,x,y in zip(res, in_x, in_y):
+        assert( x+(x*y) == r )
+
