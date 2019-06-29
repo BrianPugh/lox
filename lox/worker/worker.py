@@ -69,43 +69,23 @@ class WorkerWrapper(ABC):
 
 
 class ScatterPromise(int):
-    """ Represents: index into solution array
-    Also provides the methods/data to chain scatter calls
+    """ Represents: index into solution array.
+    Also provides the functionality to chain scatter calls.
     """
 
-    def __new__(cls, val, queue, fulfill, sol_array):
+    def __new__(cls, val, dec):
         """
         Parameters
         ----------
         val : int
             Index of result into solution array
-        queue : Queue()-like object
-            Queue that decorate function results get put on. The same queue is
-            passed to all promises made from the decorated function.
-        fulfill : Lock()-like object
-            Acquired lock that is released when results are available.
-        sol_array : deque
-            Array of solutions where sol_array[val] is the promised result.
+        dec : decorator object
+            Decorator object
         """
+
         if val < 0:
             raise ValueError("Value must be a non-negative index")
         new_obj = super(cls, cls).__new__(cls, val)
-        new_obj.queue = queue
-        new_obj.fulfill = fulfill
-        new_obj.sol_array = sol_array
-        return new_obj 
+        new_obj.dec = dec # Decorator object
+        return new_obj
 
-    def put(self, data, *args, **kwargs):
-        """ Put data onto results queue. Should probably never be used. """
-        return self.queue.put(data, *args, **kwargs)
-
-    def get(self, *args, **kwargs):
-        """ Get item from result queue. """
-        return self.queue.pop(*args, **kwargs)
-
-    def resolve(self, timeout=-1):
-        """ Block until the result is ready. """
-
-        if not self.fulfill.acquire(timeout=timeout):
-            raise Timeout
-        return self.sol_array[self]

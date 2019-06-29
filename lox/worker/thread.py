@@ -47,24 +47,27 @@ class Job:
         index of results to store func's return value(s).
     func
         function to execute
-    complete
-        synchronization object to release upon Job completion
-    args
-        positional arguments to feed into func
+    pre_args
+        positional arguments to feed into func before promised results (if available)
+    post_args
+        positional arguments to feed into func after promised results (if available)
     kwargs
         keyword arguments to feed into func
     """
 
-    def __init__(self, index, func, complete, args, kwargs):
+    def __init__(self, index, func, pre_args, post_args, kwargs):
         self.index = index
         self.func = func
-        self.complete = complete
-        self.args = args
+        self.pre_args = pre_args
+        self.args = ()
+        self.post_args = post_args
         self.kwargs = kwargs
 
     def __str__(self):
-        return "(index=%s, func=%s, complete=%s, args=%s, kwargs=%s)" % \
-                (str(self.index), str(self.func), str(self.complete), str(self.args), str(self.kwargs))
+        return "(index=%s, func=%s, pre_args=%s, args=%s, post_args=%s, kwargs=%s)" % \
+                ( str(self.index), str(self.func),
+                        str(self.pre_args), str(self.args), str(self.post_args)
+                        , str(self.kwargs) )
 
 Result = namedtuple('Result', ['index', 'value',])
 
@@ -94,19 +97,16 @@ class _ThreadWorker(threading.Thread):
             try:
                 job = self.job_queue.get(timeout=0)
                 try:
-                    log.debug("Executing decorated function %s with args %s and kwargs %s" \
-                            % (str(job.func), str(job.args), str(job.kwargs)))
-                    self.res[job.index] = job.func(*job.args, **job.kwargs)
+                    log.debug("Executing decorated function %s with pre_args %s, args %s, post_args %s, and kwargs %s" \
+                            % (str(job.func), str(job.pre_args), str(job.args), str(job.post_args), str(job.kwargs)))
+                    self.res[job.index] = job.func(*job.pre_args, *job.args, *job.post_args, **job.kwargs)
                 except Exception as e:
                     with term_colors("red"):
                         print(traceback.format_exc())
                 finally:
                     result = Result(job.index, self.res[job.index])
-                    log.debug("Placing %s onto res_queue" % str(result))
+                    log.debug("Placing %s onto res_queue %s" % (str(result), str(self.res_queue)))
                     self.res_queue.put(result)
-
-                    # indicate job complete
-                    job.complete.release()
                     self.lightswitch.release() 
             except queue.Empty:
                 # Allow worker to self-terminate
@@ -126,21 +126,25 @@ class _PromiseForwarder(threading.Thread):
             if self._kill:
                 break
 
+            if self.thread_wrapper.prev_promise is None:
+                break
+
+            # Get a result from the previous stage
+            log.debug("Trying to get from res_queue %s" % (str(self.thread_wrapper.prev_promise.dec.res_queue),))
             try:
-                result = self.thread_wrapper.prev_queue.get(timeout=1)
+                result = self.thread_wrapper.prev_promise.dec.res_queue.get(timeout=1)
             except queue.Empty:
                 continue
             log.debug("Popped result %s" % str(result))
 
-            prev_chain_res = result.value
-
+            # Get the job
             # Need to loop incase worker threads are faster than main thread
             for i in range(10):
                 try:
                     job = self.thread_wrapper.jobs[result.index]
                     break
                 except Exception as e:
-                    log.warn(e)
+                    log.warning(e)
                     sleep(self.sleep_time)
             else:
                 # Failure
@@ -150,11 +154,11 @@ class _PromiseForwarder(threading.Thread):
 
             # Insert the previous results into the new job's args
             # todo: insert this at the same position the promise was fed in
-            job.args = result.value + job.args
+            job.args = result.value
 
             log.debug("PromiseForwarder: forwarding job %s" % str(job))
             self.thread_wrapper.dispatch_job(job)
-
+        log.debug("PromiseForwarder Exiting")
         return
 
     def kill(self):
@@ -181,17 +185,22 @@ class _ThreadWrapper(WorkerWrapper):
         super().__init__(n_workers, func)
 
         self.job_queue = queue.Queue() # Queue to put jobs on
-        self.res_queue = queue.Queue() # Queue to put results on
         self.jobs_complete_lock = Lock()
         self.job_lightswitch = LightSwitch(self.jobs_complete_lock) # Used to determine if all jobs have been completed
 
         self.workers_sem = BoundedSemaphore(self.n_workers)
         self.daemon      = daemon
 
-        self.promise_forwarder = None # Thread handle for the promise forwarding task
-        self.promises = deque()       # List of promises
-        self.jobs = deque()           # list of jobs; todo: make a promise include job
-        self.prev_queue = None        # In chaining, the previous chain's result queue
+        self.clear()
+
+
+    def clear(self):
+        self.res_queue = queue.Queue() # Queue to put results on
+        self.promise_forwarder = None  # Thread handle for the promise forwarding task
+        self.promises = deque()        # List of promises
+        self.jobs = deque()            # list of jobs;
+        self.response = deque()
+        self.prev_promise = None            # In chaining, a previous chain's promise
 
     def __len__(self):
         """ Return length of job queue """
@@ -206,8 +215,10 @@ class _ThreadWrapper(WorkerWrapper):
                     self.workers_sem, self.job_lightswitch, daemon=self.daemon).start()
 
     def _create_promise_forwarder(self):
+        """ Create promise forwarding thread """
+
         if self.promise_forwarder is None:
-            # Create promise forwarding thread
+            log.debug("Creating promise forwarder thread")
             self.promise_forwarder = _PromiseForwarder(self,)
             self.promise_forwarder.start()
 
@@ -226,42 +237,60 @@ class _ThreadWrapper(WorkerWrapper):
         self.job_lightswitch.acquire()
         index = len(self.response)
         self.response.append(None)
-        job_complete = Lock()
-        job_complete.acquire()
 
-        promise = ScatterPromise(index, self.res_queue, job_complete, self.response)
+        promise = ScatterPromise(index, self) #self.res_queue, self.response, self.gather)
         self.promises.append(promise)
 
-
         # Detect if these are actual arguments or a single promise (implies chaining)
-        if detect_chaining and len(args) > 0 and isinstance(args[0], ScatterPromise):
-            job = Job(index, self.func, job_complete, (), {}) # todo; use args kwargs
-            self.jobs.append(job)
-            if self.prev_queue is None:
-                self.prev_queue = args[0].queue
-            self._create_promise_forwarder()
+        prev_promise = None
+        if detect_chaining:
+            pre_args, post_args = [], []
+            for arg in args:
+                if isinstance(arg, ScatterPromise):
+                    if prev_promise:
+                        raise ValueError("There can only be one promise")
+                    else:
+                        prev_promise = arg
+                    continue
+                if prev_promise is not None:
+                    post_args.append(arg)
+                else:
+                    pre_args.append(arg)
+            pre_args = tuple(pre_args)
+            post_args = tuple(post_args)
         else:
-            job = Job(index, self.func, job_complete, args, kwargs)
-            self.jobs.append(job)
+            pre_args = args
+            post_args = ()
+
+        job = Job(index, self.func, pre_args, post_args, kwargs)
+        self.jobs.append(job)
+
+        if prev_promise is not None:
+            if self.prev_promise is None:
+                self.prev_promise = prev_promise
+        else:
             self.dispatch_job(job)
+
+        if self.prev_promise is not None:
+            self._create_promise_forwarder()
 
         return promise
 
     def gather(self):
+        log.debug("Gathering %s" % (str(self.func),))
         with self.jobs_complete_lock: # Wait until all jobs are done
+            log.debug("Gathering %s: jobs_complete_lock acquired" % (str(self.func)))
             response = list(self.response)
 
-            # Clear internal results
-            self.response = deque()
-            self.res_queue = queue.Queue()
-            self.promises = deque()
-            self.jobs = deque()
-
             if self.promise_forwarder is not None:
+                log.debug("Gathering previous %s" % (str(self.prev_promise.dec.func),))
+                self.prev_promise.dec.gather()
+
                 self.promise_forwarder.kill()
                 self.promise_forwarder = None
 
-            self.prev_queue = None
+            # Clear internal results
+            self.clear()
 
         return response
 
