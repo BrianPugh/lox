@@ -13,24 +13,8 @@ __all__ = ["QLock", ]
 
 class QLock:
     """FIFO Lock
+
     Modified from https://stackoverflow.com/a/19695878
-
-    Methods
-    -------
-    __enter__()
-        Context manager enter with no arguments.
-
-    __exit__()
-        Context manager exit
-
-    __len__()
-        Returns the length of the queue.
-
-    acquire(timeout=-1)
-        Acquire the lock.
-
-    release()
-        Release the lock.
     """
 
     def __init__(self):
@@ -73,6 +57,7 @@ class QLock:
 
         Return
         ------
+        bool
             True on successful acquire, False on timeout
         """
 

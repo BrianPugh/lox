@@ -16,19 +16,12 @@ class IndexSemaphore:
 
     Example usecase: thread acquiring a GPU
 
-    Methods
-    -------
-    __call__(timeout=None)
-        Enter context manager when a timeout wants to be specified.
-
-    __len__()
-        Returns the number of 'free' resources.
-
-    acquire(timeout=None)
-        Returns the index between [0, val) of the acquired resource.
-
-    release(index)
-        Release the resource at index.
+    Example:
+        >>> sem = IndexSemaphore(4)
+        >>> with sem() as index:
+        >>>     print("Obtained resource %d" % (index,))
+        >>> 
+        Obtained resource 0
     """
 
     def __init__(self, val):
@@ -50,22 +43,18 @@ class IndexSemaphore:
     @contextmanager
     def __call__(self, timeout=None):
         """Enter context manager when a timeout wants to be specified.
-
         Only to be call as part of a "with" statement.
-
-        Example:
-            >>> sem = IndexSemaphore(4)
-            >>> with sem(timeout=1) as index:
-            >>>     print("Obtained resource %d" % (index,))
-            >>> 
-            Obtained resouce 0
 
         Parameters
         ----------
         timeout : float
             Maximum number of seconds to wait before aborting.
-            Returns None on timeout.
             Set timeout=None for no timeout.
+
+        Returns
+        -------
+        int
+            Resource index. None on timeout/failure.
         """
 
         index = self.acquire(timeout=timeout)
@@ -78,6 +67,13 @@ class IndexSemaphore:
                 self.release(index)
 
     def __len__(self):
+        """ 
+        Returns
+        -------
+        int
+            Get the current blocked queue size
+        """
+
         return self.queue.qsize()
 
     def acquire(self, timeout=None):
@@ -89,7 +85,8 @@ class IndexSemaphore:
             Maximum number of seconds to wait before returning
 
         Returns
-        ----------
+        -------
+        int
             Resource index on successful acquire. None on timeout
         """
 

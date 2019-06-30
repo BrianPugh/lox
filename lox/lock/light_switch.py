@@ -32,18 +32,6 @@ class LightSwitch:
 
     counter: int
         Number of times the LightSwitch has been acquired without release.
-
-    Methods
-    -------
-    acquire(timeout=-1)
-        Acquire the LightSwitch and increment the internal counter.
-        When the internal counter is incremented from zero, it will acquire
-        the provided lock.
-
-    release()
-        Release the LightSwitch by decrementing the internal counter.
-        When the internal counter is decremented to zero, it will release
-        the provided lock.
     """
 
     def __init__(self, lock, multiprocessing=False):
@@ -92,7 +80,13 @@ class LightSwitch:
         self.release()
 
     def __len__(self):
-        """Get the counter value"""
+        """Get the counter value
+
+        Returns
+        -------
+        int
+            counter value (number of times lightswitch has been acquired).
+        """
 
         return self.counter
 
@@ -109,7 +103,8 @@ class LightSwitch:
 
         Return
         ------
-            Return True on success, False on failure (like timeout)
+        bool
+            True on success, False on failure (like timeout)
         """
 
         # Acquire the counter_lock while keeping track of approximately time

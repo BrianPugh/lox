@@ -160,7 +160,7 @@ def thread(max_workers, daemon=None):
 
     Example:
 
-.. doctest::
+    .. doctest::
 
         >>> import lox
         >>>
@@ -177,29 +177,46 @@ def thread(max_workers, daemon=None):
         >>> print(results)
         [0, 2, 6, 12, 20]
 
+    Parameters
+    ----------
+    max_workers : int
+        Maximum number of threads to invoke.
+        When ``lox.thread`` is called without ``()``, the wrapped function 
+        a default number of max_workers is used (50).
+
     Methods
     -------
     __call__( *args, **kwargs )
         Vanilla passthrough function execution. Default user function behavior.
 
+        Returns
+        -------
+        Decorated function return type.
+           Return of decorated function.
+
     __len__()
-        Returns the current job queue length
+        Returns
+        -------
+        int
+            Current job queue length. Number of jobs that are currently waiting
+            for an available worker.
 
     scatter( *args, **kwargs)
-        Start a job executing `func( *args, **kwargs )`.
-        Workers are spun up automatically.
-        Obtain results via `gather()`.
+        Start a job executing decorated function ``func( *args, **kwargs )``.
+        Workers are created and destroyed automatically.
+
+        Returns
+        -------
+        int
+            Solution's index into the results obtained via ``gather()``.
 
     gather()
-        Block until all jobs called via `scatter()` are complete.
-        Returns a list of results in the order that scatter was invoked.
+        Block until all jobs called via ``scatter()`` are complete.
 
-    Parameters
-    ----------
-    max_workers : int
-        Maximum number of threads to invoke.
-        When not specified, the wrapped function becomes the first argument
-        and a default number of max_workers is used.
+        Returns
+        -------
+        list
+            Results in the order that scatter was invoked.
     """
 
     @auto_adapt_to_methods
