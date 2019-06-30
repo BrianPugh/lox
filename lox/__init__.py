@@ -9,5 +9,6 @@ __email__ = 'bnp117@gmail.com'
 __version__ = '0.4.3'
 
 from .lock import *
+from .queue import *
 from .worker import *
 from .exceptions import *
