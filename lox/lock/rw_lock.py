@@ -20,6 +20,9 @@ class RWLock:
     readers are finished, the writer acquires the lock, and finally 
     releases it.
 
+    Similar to a lox.LightSwitch, but blocks incoming "readers" while a "write"
+    is trying to be performed.
+
     Attributes
     ----------
     read_counter : int
@@ -52,7 +55,13 @@ class RWLock:
             self.release(rw_flag)
 
     def __len__(self):
-        """Get the read_counter value"""
+        """Get the read_counter value
+
+        Returns
+        -------
+        int
+           Number of current readers
+        """
 
         return len(self.read_counter)
 
@@ -81,6 +90,7 @@ class RWLock:
 
         Returns
         -------
+        bool
             True if lock was acquired, False otherwise
         """
 

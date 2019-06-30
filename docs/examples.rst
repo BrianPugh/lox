@@ -29,8 +29,8 @@ like the following.
     It took 2.942 seconds to get 3 sites
 
 It's nice, simple, and it just works. However, your computer is just idling while
-waiting for a network response. With **lox**, you can just wrap the function you
-want to add concurrency. We replace the direct calls to the function with ``func.scatter`` which will pass all the ``args`` and ``kwargs`` to the wrapped function. Finally, when we need all the function results, we call ``func.gather()`` which will return a list of the outputs of the wrapped function. The outputs are guarenteed to be in the same order that the ``scatter`` were called
+waiting for a network response. With **lox**, you can just decorate the function you
+want to add concurrency. We replace the direct calls to the function with ``func.scatter`` which will pass all the ``args`` and ``kwargs`` to the decorated function. Finally, when we need all the function results, we call ``func.gather()`` which will return a list of the outputs of the decorated function. The outputs are guarenteed to be in the same order that the ``scatter`` were called
 
 .. doctest::
 
@@ -57,8 +57,8 @@ With minimal modifications, we now have a multithreaded application with
 significant performance improvements.
 
 
-Multiprocessing Fibonacci
--------------------------
+Multiprocessing
+---------------
 
 
 .. doctest::
@@ -87,13 +87,12 @@ Multiprocessing Fibonacci
     >>> print("Parallel took %.3f seconds" % (t_diff, )) #doctest: +SKIP
     Parallel took 0.062 seconds
 
-TODO
 
 Obtaining a resource from a pool
 --------------------------------
 
 Imagine you have 4 GPUs that are part of a data processing pipeline, and the 
-GPUs perform the task disproportionally faster than the rest of the pipeline.
+GPUs perform the task disproportionally faster (or slower!) than the rest of the pipeline.
 Below we have many threads fetching and processing data, but they need to share
 the 4 GPUs for accelerated processing.
 
