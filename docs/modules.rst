@@ -41,3 +41,11 @@ IndexSemaphore
 .. autoclass:: lox.lock.IndexSemaphore
    :members:
 
+Queue
+-----
+
+Announcement
+^^^^^^^^^^^^
+.. autoclass:: lox.queue.Announcement
+   :members:
+

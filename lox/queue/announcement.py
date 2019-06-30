@@ -11,6 +11,32 @@ __all__ = ["Announcement",]
 
 class Announcement:
     """ Put to many queues.
+
+    Example:
+
+    .. doctest::
+
+        >>> import lox
+        >>> ann = lox.Announcement()
+        >>> foo_q = ann.subscribe()
+        >>> bar_q = ann.subscribe()
+        >>> 
+        >>> @lox.thread
+        ... def foo():
+        ...     x = foo_q.get()
+        ...     return x
+        >>> 
+        >>> @lox.thread
+        ... def bar():
+        ...     x = bar_q.get()
+        ...     return x**2
+        >>> 
+        >>> ann.put(5)
+        >>> foo.scatter()
+        >>> foo_res = foo.gather()
+        >>> bar.scatter()
+        >>> bar_res = bar.gather()
+
     """
 
     def __init__(self, maxsize=0):

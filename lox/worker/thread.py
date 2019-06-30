@@ -9,7 +9,7 @@ Example:
 .. doctest::
 
     >>> import lox
-    >>>
+    >>> 
     >>> @lox.thread(4) # Will operate with a maximum of 4 threads
     ... def foo(x,y):
     ...     return x*y
@@ -163,7 +163,7 @@ def thread(max_workers, daemon=None):
     .. doctest::
 
         >>> import lox
-        >>>
+        >>> 
         >>> @lox.thread(4) # Will operate with a maximum of 4 threads
         ... def foo(x,y):
         ...     return x*y
