@@ -1,6 +1,4 @@
-===
-lox
-===
+.. image:: assets/lox_200w.png
 
 
 .. image:: https://img.shields.io/pypi/v/lox.svg
