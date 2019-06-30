@@ -119,7 +119,7 @@ html_theme = 'sphinx_rtd_theme'
 #
 html_theme_options = {
     'canonical_url': '',
-    'logo_only': False,
+    'logo_only': True,
     'display_version': True,
     'prev_next_buttons_location': 'bottom',
     'style_external_links': False,
@@ -132,7 +132,8 @@ html_theme_options = {
     'titles_only': False
 }
 
-#html_logo = "../assets/lox.png"
+html_logo = "../assets/lox_200w.png"
+html_favicon = "../assets/logo.ico"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
