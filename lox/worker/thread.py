@@ -158,10 +158,13 @@ class _PromiseForwarder(threading.Thread):
             log.debug("PromiseForwarder: Retrieved job %s" % str(job))
 
             # Insert the previous results into the new job's args
-            # todo: insert this at the same position the promise was fed in
-            if isinstance(result.value, tuple):
-                job.args = result.value
+            if self.thread_wrapper.auto_unpack:
+                if isinstance(result.value, tuple):
+                    job.args = result.value
+                else:
+                    job.args = (result.value,)
             else:
+                log.debug("Not auto-unpacking")
                 job.args = (result.value,)
 
             log.debug("PromiseForwarder: forwarding job %s" % str(job))
@@ -198,9 +201,9 @@ class _ThreadWrapper(WorkerWrapper):
 
         self.workers_sem = BoundedSemaphore(self.n_workers)
         self.daemon      = daemon
+        self.enable_auto_unpacking()
 
         self.clear()
-
 
     def clear(self):
         log.debug("_ThreadWrapper clearing")
@@ -209,7 +212,18 @@ class _ThreadWrapper(WorkerWrapper):
         self.promises = deque()        # List of promises
         self.jobs = deque()            # list of jobs;
         self.response = deque()
-        self.prev_promise = None            # In chaining, a previous chain's promise
+        self.prev_promise = None       # In chaining, a previous chain's promise
+        self.prev_promise_q = None
+
+    def disable_auto_unpacking(self):
+        """ Automatically unpack previously chained input tuples """
+
+        self.auto_unpack = False
+
+    def enable_auto_unpacking(self):
+        """ Do not unpack previously chained input tuples """
+
+        self.auto_unpack = True
 
     def __len__(self):
         """ Return length of job queue """
@@ -360,6 +374,12 @@ def thread(max_workers, daemon=None):
         Maximum number of threads to invoke.
         When ``lox.thread`` is called without ``()``, the wrapped function 
         a default number of max_workers is used (50).
+
+    Attributes
+    ----------
+    auto_unpack
+        While chaining, unpack the results of the previous function if it returns
+        a tuple. Defaults to ``True``.
 
     Methods
     -------

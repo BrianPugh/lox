@@ -174,6 +174,39 @@ def test_chaining_1_1():
     for r,x,y in zip(res, in_x, in_y):
         assert( (x+y)**2 == r )
 
+def test_chaining_1_2():
+    """ Naive chaining when func return a tuple without auto_unpacking.
+    """
+
+    in_x = [1,   2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12,]
+    in_y = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,]
+
+    @lox.thread(2)
+    def foo(x,y):
+        return x**2, y**2
+
+    @lox.thread(2)
+    def bar(x):
+        return x[0] + x[1]
+
+    bar.disable_auto_unpacking()
+
+    for x,y in zip(in_x, in_y):
+        bar.scatter(foo.scatter(x,y))
+    res = bar.gather()
+    assert(len(res) == len(in_x))
+    for r,x,y in zip(res, in_x, in_y):
+        assert( x**2+y**2 == r )
+
+    log.info("First chain call successful")
+
+    for x,y in zip(in_x, in_y):
+        bar.scatter(foo.scatter(x,y))
+    res = bar.gather()
+    assert(len(res) == len(in_x))
+    for r,x,y in zip(res, in_x, in_y):
+        assert( x**2+y**2 == r )
+
 def test_chaining_2():
     """ Test positional arguments while chaining
     """
