@@ -1,6 +1,7 @@
 import threading
 import lox
 from time import sleep, time
+import logging as log
 
 SLEEP_TIME = 0.01
 N_WORKERS = 5
@@ -132,6 +133,8 @@ def test_chaining_1():
     assert(len(res) == len(in_x))
     for r,x,y in zip(res, in_x, in_y):
         assert( x+(x*y) == r )
+
+    log.info("First chain call successful")
 
     for x,y in zip(in_x, in_y):
         bar.scatter(foo.scatter(y,x))

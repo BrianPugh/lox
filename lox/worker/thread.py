@@ -162,7 +162,7 @@ class _PromiseForwarder(threading.Thread):
             job.args = result.value
 
             log.debug("PromiseForwarder: forwarding job %s" % str(job))
-            self.thread_wrapper.dispatch_job(job)
+            self.thread_wrapper._dispatch_job(job)
         log.debug("PromiseForwarder Exiting")
         return
 
@@ -200,6 +200,7 @@ class _ThreadWrapper(WorkerWrapper):
 
 
     def clear(self):
+        log.debug("_ThreadWrapper clearing")
         self.res_queue = Announcement(backlog=0) # Queue to put results on
         self.promise_forwarder = None  # Thread handle for the promise forwarding task
         self.promises = deque()        # List of promises
@@ -227,7 +228,7 @@ class _ThreadWrapper(WorkerWrapper):
             self.promise_forwarder = _PromiseForwarder(self,)
             self.promise_forwarder.start()
 
-    def dispatch_job(self, job):
+    def _dispatch_job(self, job):
         self.job_queue.put(job)
         self._create_worker() # Create a thread if we are not at capacity
 
@@ -275,18 +276,25 @@ class _ThreadWrapper(WorkerWrapper):
                 self.prev_promise_q = prev_promise.dec.res_queue.subscribe()
                 self.prev_promise = prev_promise
         else:
-            self.dispatch_job(job)
+            self._dispatch_job(job)
 
         if self.prev_promise is not None:
             self._create_promise_forwarder()
 
         return promise
 
+    def _finalize(self):
+        """ Finalize self.res_queue and previous chain """
+
+        self.res_queue.finalize()
+        if self.prev_promise is not None:
+            self.prev_promise.dec._finalize()
+
     def gather(self):
         log.debug("Gathering %s" % (str(self.func),))
 
-        if self.prev_promise is not None:
-            self.prev_promise.dec.res_queue.finalize()
+        # Save res_queue backlog memory
+        self._finalize()
 
         with self.jobs_complete_lock: # Wait until all jobs are done
             log.debug("Gathering %s: jobs_complete_lock acquired" % (str(self.func)))
@@ -294,10 +302,10 @@ class _ThreadWrapper(WorkerWrapper):
 
             if self.promise_forwarder is not None:
                 log.debug("Gathering previous %s" % (str(self.prev_promise.dec.func),))
-                self.prev_promise.dec.gather()
 
                 self.promise_forwarder.kill()
                 self.promise_forwarder = None
+                self.prev_promise.dec.gather()
 
             # Clear internal results
             self.clear()
