@@ -253,7 +253,7 @@ class _ThreadWrapper(WorkerWrapper):
             for arg in args:
                 if isinstance(arg, ScatterPromise):
                     if prev_promise:
-                        raise ValueError("There can only be one promise")
+                        raise ValueError("There can only be one promise. If your input takes more than one promise, you should probably be calling \"gather()\"")
                     else:
                         prev_promise = arg
                     continue
@@ -284,6 +284,10 @@ class _ThreadWrapper(WorkerWrapper):
 
     def gather(self):
         log.debug("Gathering %s" % (str(self.func),))
+
+        if self.prev_promise is not None:
+            self.prev_promise.dec.res_queue.finalize()
+
         with self.jobs_complete_lock: # Wait until all jobs are done
             log.debug("Gathering %s: jobs_complete_lock acquired" % (str(self.func)))
             response = list(self.response)
