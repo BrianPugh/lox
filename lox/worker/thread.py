@@ -34,6 +34,7 @@ import traceback
 import sys
 from ..lock import LightSwitch
 from ..helper import auto_adapt_to_methods, MethodDecoratorAdaptor, term_colors
+from ..queue import Announcement
 from .worker import WorkerWrapper, ScatterPromise
 
 __all__ = ["thread", ]
@@ -115,7 +116,10 @@ class _ThreadWorker(threading.Thread):
         return
 
 class _PromiseForwarder(threading.Thread):
+    """ Forwards Promises from the announcement to the job queue """
+
     sleep_time = 0.01
+
     def __init__( self, thread_wrapper, **kwargs ):
         super().__init__(**kwargs)
         self.thread_wrapper = thread_wrapper
@@ -130,9 +134,10 @@ class _PromiseForwarder(threading.Thread):
                 break
 
             # Get a result from the previous stage
-            log.debug("Trying to get from res_queue %s" % (str(self.thread_wrapper.prev_promise.dec.res_queue),))
+            log.debug("Trying to get from res_queue %s" % (str(self.thread_wrapper.prev_promise_q),))
             try:
-                result = self.thread_wrapper.prev_promise.dec.res_queue.get(timeout=1)
+                # Timeout so we can poll the self._kill attribute
+                result = self.thread_wrapper.prev_promise_q.get(timeout=1)
             except queue.Empty:
                 continue
             log.debug("Popped result %s" % str(result))
@@ -195,7 +200,7 @@ class _ThreadWrapper(WorkerWrapper):
 
 
     def clear(self):
-        self.res_queue = queue.Queue() # Queue to put results on
+        self.res_queue = Announcement(backlog=0) # Queue to put results on
         self.promise_forwarder = None  # Thread handle for the promise forwarding task
         self.promises = deque()        # List of promises
         self.jobs = deque()            # list of jobs;
@@ -238,7 +243,7 @@ class _ThreadWrapper(WorkerWrapper):
         index = len(self.response)
         self.response.append(None)
 
-        promise = ScatterPromise(index, self) #self.res_queue, self.response, self.gather)
+        promise = ScatterPromise(index, self)
         self.promises.append(promise)
 
         # Detect if these are actual arguments or a single promise (implies chaining)
@@ -267,6 +272,7 @@ class _ThreadWrapper(WorkerWrapper):
 
         if prev_promise is not None:
             if self.prev_promise is None:
+                self.prev_promise_q = prev_promise.dec.res_queue.subscribe()
                 self.prev_promise = prev_promise
         else:
             self.dispatch_job(job)

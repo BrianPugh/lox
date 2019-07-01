@@ -71,6 +71,12 @@ class Announcement:
     def backlog(self, val):
         self._backlog = val
 
+    def __repr__(self,):
+        with self.lock:
+            qs = [str(q) for q in self.subscribers]
+            string = super().__repr__() + ' with subscribers ' + ','.join(qs)
+        return string
+
     def __init__(self, maxsize=0, backlog=None):
         """ Create an Announcement object.
 
