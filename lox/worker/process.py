@@ -36,7 +36,7 @@ from ..helper import auto_adapt_to_methods, MethodDecoratorAdaptor
 __all__ = ['process',]
 
 class _ProcessWrapper(WorkerWrapper):
-    """Process helper decorator
+    """Process helper decorator.
     """
 
     def __init__(self, func, n_workers=None):
@@ -46,7 +46,11 @@ class _ProcessWrapper(WorkerWrapper):
         self.pool = mp.Pool(n_workers)
 
     def __len__(self):
-        """ Returns the number of jobs not yet completed
+        """ 
+        Returns
+        -------
+        int
+            Number of jobs not yet completed.
         """
 
         count = 0
@@ -58,7 +62,12 @@ class _ProcessWrapper(WorkerWrapper):
 
     def scatter(self, *args, **kwargs):
         """Enqueue a job to be processed by workers.
-        Spin up workers if necessary
+        Spin up workers if necessary.
+
+        Returns
+        -------
+        int
+            Index into solution list.
         """
         self.response.append(self.pool.apply_async(self.func, args=args, kwds=kwargs))
         return len(self.response)-1
@@ -66,14 +75,19 @@ class _ProcessWrapper(WorkerWrapper):
     def gather(self):
         """ Gather results. Blocks until job_queue is empty.
         Also blocks scatter on other processes.
-        Returns list of results in order scatter'd
+
+        Returns
+        -------
+        list
+            Results in order scatter'd
         """
+
         fetched = [x.get() for x in self.response]
         self.response = deque()
         return fetched
 
 def process(n_workers):
-    """ Decorator to execute a function in multiple processes
+    """ Decorator to execute a function in multiple processes.
 
     Example:
 
@@ -107,13 +121,13 @@ def process(n_workers):
         Returns
         -------
         Decorated function return type.
-           Return of decorated function.
+            Return of decorated function.
 
     __len__()
         Returns
         -------
         int
-            job queue length
+            job queue length.
 
     scatter( *args, **kwargs )
         Start a job executing ``func( *args, **kwargs )``.

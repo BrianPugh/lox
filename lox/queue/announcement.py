@@ -19,7 +19,9 @@ class SubscribeFinalizedError(Exception):
     pass
 
 class Announcement:
-    """ Put to many queues with backlog support.
+    """ Push to many queues with backlog support.
+
+    Allows the pushing of data to many threads.
 
     Example:
 
@@ -47,7 +49,8 @@ class Announcement:
         >>> bar_res = bar.gather()
 
     The backlog allows future (or potentially race-condition) subscribers to 
-    get content put'd before they subscribed.
+    get content put'd before they subscribed. However, the user must be careful 
+    of memory consumption.
 
     Attributes
     ----------
@@ -84,7 +87,7 @@ class Announcement:
         Parameters
         ----------
         maxsize : int
-            Created queue's default maximum size. Defaults to 0 (no size limit)
+            Created queue's default maximum size. Defaults to 0 (no size limit).
 
         backlog : int
             Create a log of previously put data. New subscribers get the entire 
@@ -129,12 +132,12 @@ class Announcement:
         return len(self.subscribers)
 
     def put(self, data, *args, **kwargs):
-        """ Put data on all queues
+        """ Push data to all subscribed queues.
 
         Parameters
         ----------
         data : object
-            Data to put on the queue
+            Data to put on the queue.
         """
         with self.lock:
             for q in self.subscribers:
@@ -143,7 +146,7 @@ class Announcement:
                 self.backlog.append(data)
 
     def subscribe(self, q=None, maxsize=None, *args, **kwargs):
-        """ Subscribe to announcements
+        """ Subscribe to announcements.
 
         Parameters
         ----------
@@ -158,7 +161,7 @@ class Announcement:
         Returns
         -------
         Queue
-            Queue-like object.
+            Queue-like object for receiver to ``get`` data from.
         """
 
         with self.lock:
@@ -178,12 +181,12 @@ class Announcement:
         return q
 
     def unsubscribe(self, q):
-        """ Remove the queue from queue-list. Will no longer receive announcements
+        """ Remove the queue from queue-list. Will no longer receive announcements.
 
         Parameters
         ----------
         q : Queue
-            Queue object to remove
+            Queue object to remove.
 
         Raises
         ------

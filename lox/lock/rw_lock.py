@@ -27,17 +27,11 @@ class RWLock:
     ----------
     read_counter : int
         Number of readers that have acquired the lock.
-
-    Methods
-    -------
-    acquire(rw_flag:str)
-        Acquire the lock as a "reader" or a "writer"
-
-    release(rw_flag:str)
-        Release the lock as a "reader" or a "writer"
-
     """
+
     def __init__(self):
+        """ Create RWLock object """
+
         self._no_writers    = Lock()
         self._no_readers    = Lock()
         self.read_counter   = LightSwitch(self._no_writers)
@@ -91,7 +85,7 @@ class RWLock:
         Returns
         -------
         bool
-            True if lock was acquired, False otherwise
+            ``True`` if lock was acquired, ``False`` otherwise.
         """
 
         obtained = False
@@ -121,7 +115,7 @@ class RWLock:
         return obtained
 
     def release(self, rw_flag:str):
-        """Release acquired lock
+        """Release acquired lock.
 
         Parameters
         ----------

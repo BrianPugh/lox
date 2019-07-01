@@ -335,6 +335,22 @@ def thread(max_workers, daemon=None):
         >>> print(results)
         [0, 2, 6, 12, 20]
 
+    Multiple decorated functions can be chained together, each function drawing
+    from their own pool of threads. Functions that return tuples will automatically
+    unpack into the chained function. Positional arguments and keyword arguments
+    can be passed in as they normally would.
+
+    .. doctest::
+        >>> @lox.thread(2) # Will operate with a maximum of 2 threads
+        ... def bar(x,y):
+        ...     return x + y
+
+        >>>  for i in range(5):
+        ...    foo_res = foo.scatter(i, i+1)
+        ...    bar.scatter(foo_res, 10) # scatter will automatically unpack the results of foo 
+        >>>  
+        >>> results = bar.gather() 
+
     Parameters
     ----------
     max_workers : int

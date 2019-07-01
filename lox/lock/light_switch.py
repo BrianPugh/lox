@@ -70,17 +70,17 @@ class LightSwitch:
         self._counter = counter
 
     def __enter__(self):
-        """ Acquire LightSwitch at context enter """
+        """ Acquire LightSwitch at context enter. """
 
         self.acquire()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """ Release LightSwitch at context exit """
+        """ Release LightSwitch at context exit. """
 
         self.release()
 
     def __len__(self):
-        """Get the counter value
+        """Get the counter value.
 
         Returns
         -------
@@ -104,7 +104,7 @@ class LightSwitch:
         Return
         ------
         bool
-            True on success, False on failure (like timeout)
+            ``True`` on success, ``False`` on failure (like timeout).
         """
 
         # Acquire the counter_lock while keeping track of approximately time

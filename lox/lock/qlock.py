@@ -12,30 +12,36 @@ __all__ = ["QLock", ]
 
 
 class QLock:
-    """FIFO Lock
+    """Lock that guarentees FIFO operation. Approximately 6x slower than a 
+    normal ``Lock()``.
 
     Modified from https://stackoverflow.com/a/19695878
     """
 
     def __init__(self):
-        """ Create a QLock object """
+        """ Create a QLock object. """
 
         self.queue = deque()
         self.lock = Lock()
         self.count = 0
 
     def __enter__(self):
-        """ Acquire QLock at context enter """
+        """ Acquire QLock at context enter. """
 
         self.acquire()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """ Release QLock at context exit """
+        """ Release QLock at context exit. """
 
         self.release()
 
     def __len__(self,):
-        """ Length of queue """
+        """ 
+        Returns
+        -------
+        int
+            Number of tasks waiting to acquire.
+        """
 
         return self.count
 
