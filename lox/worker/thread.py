@@ -159,7 +159,10 @@ class _PromiseForwarder(threading.Thread):
 
             # Insert the previous results into the new job's args
             # todo: insert this at the same position the promise was fed in
-            job.args = result.value
+            if isinstance(result.value, tuple):
+                job.args = result.value
+            else:
+                job.args = (result.value,)
 
             log.debug("PromiseForwarder: forwarding job %s" % str(job))
             self.thread_wrapper._dispatch_job(job)

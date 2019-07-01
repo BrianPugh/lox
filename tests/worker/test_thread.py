@@ -143,6 +143,37 @@ def test_chaining_1():
     for r,x,y in zip(res, in_x, in_y):
         assert( y+(y*x) == r )
 
+def test_chaining_1_1():
+    """ Naive chaining when func doesn't return a tuple
+    """
+
+    in_x = [1,   2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12,]
+    in_y = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,]
+
+    @lox.thread(2)
+    def foo(x,y):
+        return x + y
+
+    @lox.thread(2)
+    def bar(x):
+        return x ** 2
+
+    for x,y in zip(in_x, in_y):
+        bar.scatter(foo.scatter(x,y))
+    res = bar.gather()
+    assert(len(res) == len(in_x))
+    for r,x,y in zip(res, in_x, in_y):
+        assert( (x+y)**2 == r )
+
+    log.info("First chain call successful")
+
+    for x,y in zip(in_x, in_y):
+        bar.scatter(foo.scatter(x,y))
+    res = bar.gather()
+    assert(len(res) == len(in_x))
+    for r,x,y in zip(res, in_x, in_y):
+        assert( (x+y)**2 == r )
+
 def test_chaining_2():
     """ Test positional arguments while chaining
     """
