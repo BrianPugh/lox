@@ -40,9 +40,15 @@ Features
 
 * **Synchronization**: Advanced thread synchronization, communication, and resource management tools.
 
+Todos
+-----
+
+* All objects except ``lox.process`` are for threads. These will eventually be multiprocess friendly.
+
+* Chaining of scatter calls to multiple worker pools
 
 Usage
---------
+-----
 
 Easy Multithreading
 ^^^^^^^^^^^^^^^^^^^
