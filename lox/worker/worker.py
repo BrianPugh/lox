@@ -42,20 +42,30 @@ class WorkerWrapper(ABC):
         self.response = deque() # Stores gather'd user function responses
 
     def __call__(self, *args, **kwargs):
-        """ Vanilla execute the wrapped function"""
+        """ Vanilla execute the wrapped function. """
 
         return self.func(*args, **kwargs)
 
     @abstractmethod
     def __len__(self):
-        """ Return length of job queue """
+        """
+        Returns
+        -------
+        int
+            Length of unprocessed job queue.
+        """
 
         return
 
     @abstractmethod
     def scatter(self, *args, **kwargs):
         """Enqueue a job to be processed by workers.
-        Spin up workers if necessary
+        Spin up workers if necessary.
+
+        Returns
+        -------
+        int-like
+            Index into solution array. May be a int-like promise for chaining.
         """
         return
 
@@ -63,7 +73,11 @@ class WorkerWrapper(ABC):
     def gather(self):
         """ Gather results. Blocks until job_queue is empty.
         Also blocks scatter on other threads.
-        Returns list of results in order scatter'd
+
+        Returns
+        -------
+        list
+            Results in order ``scatter``'d
         """
         return
 
@@ -78,9 +92,9 @@ class ScatterPromise(int):
         Parameters
         ----------
         val : int
-            Index of result into solution array
+            Index of result into solution array.
         dec : decorator object
-            Decorator object
+            Decorator object.
         """
 
         if val < 0:

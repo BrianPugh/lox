@@ -1,20 +1,21 @@
 """
 .. module:: index_semaphore
-   :synopsis: BoundedSemaphore where acquires return an index from [0, val)
+   :synopsis: BoundedSemaphore where acquires return an index from [0, val).
 
 .. moduleauthor:: Brian Pugh <bnp117@gmail.com>
 """
 
 from queue import Queue, Empty, Full
 from contextlib import contextmanager
+import logging as log
 
 __all__ = ["IndexSemaphore", ]
 
 
 class IndexSemaphore:
-    """ BoundedSemaphore where acquires return an index from [0, val)
+    """ ``BoundedSemaphore``-like object where acquires return an index from [0, val).
 
-    Example usecase: thread acquiring a GPU
+    Example usecase: thread acquiring a GPU.
 
     Example:
         >>> sem = IndexSemaphore(4)
@@ -25,12 +26,12 @@ class IndexSemaphore:
     """
 
     def __init__(self, val):
-        """Create an IndexSemaphore object
+        """Create an ``IndexSemaphore`` object.
 
         Parameters
         ----------
         val : int
-            Number of resources available
+            Number of resources available.
         """
 
         if val <= 0:
@@ -61,7 +62,7 @@ class IndexSemaphore:
         try:
             yield index
         except Exception as e:
-            print(e)
+            log.error(e)
         finally:
             if index is not None:
                 self.release(index)
@@ -71,23 +72,23 @@ class IndexSemaphore:
         Returns
         -------
         int
-            Get the current blocked queue size
+            Current blocked queue size.
         """
 
         return self.queue.qsize()
 
     def acquire(self, timeout=None):
-        """Blocking acquire resource
+        """Blocking acquire resource.
 
         Parameters
         ----------
         timeout : float
-            Maximum number of seconds to wait before returning
+            Maximum number of seconds to wait before returning.
 
         Returns
         -------
         int
-            Resource index on successful acquire. None on timeout
+            Resource index on successful acquire. None on timeout.
         """
 
         try:
@@ -96,12 +97,17 @@ class IndexSemaphore:
             return None
 
     def release(self, index):
-        """ Release resource at index
+        """ Release resource at index.
 
         Parameters
         ----------
         index : int
-            Index of resource to release
+            Index of resource to release.
+
+        Raises
+        ------
+        Exception
+            Resource has been released more times than acquired.
         """
 
         try:

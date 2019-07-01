@@ -2,7 +2,6 @@
 Examples
 ========
 
-
 Multithreading Requests
 -----------------------
 
@@ -230,7 +229,7 @@ Lets start these people up:
     >>> people.gather()
     >>> janitor.gather()
 
-The results will look like:
+The results will look like::
 
     Running Restroom Demo
     (0.000 s) Person 0 entered the restroom
@@ -276,7 +275,7 @@ The janitor task would do something like:
     >>> with rwlock('w'):
     ...     # Perform resource write here
 
-While the peoplle task would look like
+While the people task would look like
 
 .. doctest::
     :skipif: True

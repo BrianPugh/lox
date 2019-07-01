@@ -16,7 +16,7 @@ __all__ = ["LightSwitch", ]
 
 
 class LightSwitch:
-    """Acquires a provided lock while LightSwitch is in use.
+    """Acquires a provided lock while ``LightSwitch`` is in use.
 
     The lightswitch pattern creates a first-in-last-out synchronization
     mechanism. The name of the pattern is inspired by people entering a
@@ -28,18 +28,18 @@ class LightSwitch:
     ----------
     lock : threading.Lock
         The lock provided to the constructor that may be acquired/released
-        by LightSwitch.
+        by ``LightSwitch``.
 
     counter: int
-        Number of times the LightSwitch has been acquired without release.
+        Number of times the ``LightSwitch`` has been acquired without release.
     """
 
     def __init__(self, lock, multiprocessing=False):
-        """Create a LightSwitch object.
+        """Create a ``LightSwitch`` object.
 
         Parameters
         ----------
-        lock : threading.Lock or pathos.multiprocessing.Lock
+        lock : ``threading.Lock`` or ``pathos.multiprocessing.Lock``
             Lock to acquire when internal counter is incremented from zero.
             Lock to release when internal counter is decremented to zero.
         """
@@ -70,12 +70,12 @@ class LightSwitch:
         self._counter = counter
 
     def __enter__(self):
-        """ Acquire LightSwitch at context enter. """
+        """ Acquire ``LightSwitch`` at context enter. """
 
         self.acquire()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """ Release LightSwitch at context exit. """
+        """ Release ``LightSwitch`` at context exit. """
 
         self.release()
 
@@ -91,7 +91,7 @@ class LightSwitch:
         return self.counter
 
     def acquire(self, timeout=-1):
-        """Acquire the LightSwitch and increment the internal counter.
+        """Acquire the ``LightSwitch`` and increment the internal counter.
 
         When the internal counter is incremented from zero, it will acquire
         the provided lock.
@@ -101,8 +101,8 @@ class LightSwitch:
         timeout : float
             Maximum number of seconds to wait before aborting.
 
-        Return
-        ------
+        Returns
+        -------
         bool
             ``True`` on success, ``False`` on failure (like timeout).
         """
@@ -129,7 +129,7 @@ class LightSwitch:
         return True
 
     def release(self):
-        """Release the LightSwitch by decrementing the internal counter.
+        """Release the ``LightSwitch`` by decrementing the internal counter.
 
         When the internal counter is decremented to zero, it will release
         the provided lock.

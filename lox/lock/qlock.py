@@ -19,19 +19,19 @@ class QLock:
     """
 
     def __init__(self):
-        """ Create a QLock object. """
+        """ Create a ``QLock`` object. """
 
         self.queue = deque()
         self.lock = Lock()
         self.count = 0
 
     def __enter__(self):
-        """ Acquire QLock at context enter. """
+        """ Acquire ``QLock`` at context enter. """
 
         self.acquire()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """ Release QLock at context exit. """
+        """ Release ``QLock`` at context exit. """
 
         self.release()
 
@@ -47,14 +47,14 @@ class QLock:
 
     @property
     def locked(self):
-        """ Whether or not the QLock is acquired """
+        """ Whether or not the ``QLock`` is acquired """
 
         return self.count > 0
 
     def acquire(self, timeout=-1):
         """Block until resource is available.
 
-        Threads that call `acquire` obtain resource FIFO.
+        Threads that call ``acquire`` obtain resource FIFO.
 
         Parameters
         ----------
@@ -64,7 +64,7 @@ class QLock:
         Return
         ------
         bool
-            True on successful acquire, False on timeout
+            True on successful acquire, False on timeout.
         """
 
         with self.lock:
@@ -100,7 +100,7 @@ class QLock:
         Exception
         ---------
         ValueError
-            Lock released more than it has been acquired
+            Lock released more than it has been acquired.
         """
 
         with self.lock:

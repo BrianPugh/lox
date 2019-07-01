@@ -20,7 +20,7 @@ class RWLock:
     readers are finished, the writer acquires the lock, and finally 
     releases it.
 
-    Similar to a lox.LightSwitch, but blocks incoming "readers" while a "write"
+    Similar to a ``lox.LightSwitch``, but blocks incoming "readers" while a "write"
     is trying to be performed.
 
     Attributes

@@ -116,11 +116,19 @@ class _ThreadWorker(threading.Thread):
         return
 
 class _PromiseForwarder(threading.Thread):
-    """ Forwards Promises from the announcement to the job queue """
+    """ Forwards Promises from the announcement to the job queue. """
 
     sleep_time = 0.01
 
     def __init__( self, thread_wrapper, **kwargs ):
+        """ Create a _PromiseForwarder object
+
+        Parameters
+        ----------
+        thread_wrapper : _ThreadWrapper
+            decorator of current processing function
+        """
+
         super().__init__(**kwargs)
         self.thread_wrapper = thread_wrapper
         self._kill = False
@@ -173,21 +181,25 @@ class _PromiseForwarder(threading.Thread):
         return
 
     def kill(self):
+        """ Sets a flag that the worker periodically checks. When detected,
+        worker will destroy itself.
+        """
+
         self._kill = True
 
 
 class _ThreadWrapper(WorkerWrapper):
-    """Thread helper decorator
+    """Thread helper decorator.
     """
 
     def __init__(self, func, n_workers=50, daemon=None):
         """
-        Creates the callable object for the 'thread' decorator
+        Creates the callable object for the 'thread' decorator.
 
         Parameters
         ----------
         func : function
-            Function handle that each thread worker will execute
+            Function handle that each thread worker will execute.
 
         n_workers : int
             Maximum number of threads to invoke.
@@ -216,29 +228,35 @@ class _ThreadWrapper(WorkerWrapper):
         self.prev_promise_q = None
 
     def disable_auto_unpacking(self):
-        """ Automatically unpack previously chained input tuples """
+        """ Automatically unpack previously chained input tuples. 
+        Enabled by default.
+        """
 
         self.auto_unpack = False
 
     def enable_auto_unpacking(self):
-        """ Do not unpack previously chained input tuples """
+        """ Do not unpack previously chained input tuples. """
 
         self.auto_unpack = True
 
     def __len__(self):
-        """ Return length of job queue """
+        """ 
+        Returns
+        -------
+            Length of unprocessed job queue.
+        """
 
         return self.job_queue.qsize()
 
     def _create_worker(self):
-        """Create a worker if under maximum capacity"""
+        """ Create a worker if under maximum capacity. """
 
         if self.workers_sem.acquire(timeout=0):
             _ThreadWorker(self.job_queue, self.res_queue, self.response,
                     self.workers_sem, self.job_lightswitch, daemon=self.daemon).start()
 
     def _create_promise_forwarder(self):
-        """ Create promise forwarding thread """
+        """ Create promise forwarding thread. """
 
         if self.promise_forwarder is None:
             log.debug("Creating promise forwarder thread")
@@ -251,7 +269,7 @@ class _ThreadWrapper(WorkerWrapper):
 
     def scatter(self, *args, detect_chaining=True, **kwargs):
         """Enqueue a job to be processed by workers.
-        Spin up workers if necessary
+        Spin up workers if necessary.
 
         Return
         ------
@@ -301,13 +319,16 @@ class _ThreadWrapper(WorkerWrapper):
         return promise
 
     def _finalize(self):
-        """ Finalize self.res_queue and previous chain """
+        """ Finalize self.res_queue and previous chain. """
 
         self.res_queue.finalize()
         if self.prev_promise is not None:
             self.prev_promise.dec._finalize()
 
     def gather(self):
+        """ Block and collect results from prior ``scatter`` calls.
+        """
+
         log.debug("Gathering %s" % (str(self.func),))
 
         # Save res_queue backlog memory
@@ -331,7 +352,7 @@ class _ThreadWrapper(WorkerWrapper):
 
 
 def thread(max_workers, daemon=None):
-    """ Decorator to execute a function in multiple threads
+    """ Decorator to execute a function in multiple threads.
 
     Example:
 
@@ -368,18 +389,16 @@ def thread(max_workers, daemon=None):
         >>>  
         >>> results = bar.gather() 
 
+    Currently, a ``scatter`` call can have a maximum of 1 previous ``scatter``
+    result as an input argument. However, unlimited number of functions can 
+    be chained together in any topology.
+
     Parameters
     ----------
     max_workers : int
         Maximum number of threads to invoke.
         When ``lox.thread`` is called without ``()``, the wrapped function 
         a default number of max_workers is used (50).
-
-    Attributes
-    ----------
-    auto_unpack
-        While chaining, unpack the results of the previous function if it returns
-        a tuple. Defaults to ``True``.
 
     Methods
     -------
@@ -414,6 +433,13 @@ def thread(max_workers, daemon=None):
         -------
         list
             Results in the order that scatter was invoked.
+
+    disable_auto_unpacking()
+        Automatically unpack previously chained input tuples.
+
+    enable_auto_unpacking()
+        Do not unpack previously chained input tuples.
+
     """
 
     @auto_adapt_to_methods

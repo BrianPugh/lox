@@ -87,7 +87,7 @@ class _ProcessWrapper(WorkerWrapper):
         return fetched
 
 def process(n_workers):
-    """ Decorator to execute a function in multiple processes.
+    """ Decorator to execute a function/method in multiple processes.
 
     Example:
 
