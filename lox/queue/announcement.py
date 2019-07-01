@@ -7,6 +7,7 @@
 import queue
 from collections import deque
 import threading
+import logging as log
 
 __all__ = ["Announcement", "SubscribeFinalizedError", ]
 
@@ -71,6 +72,12 @@ class Announcement:
     def backlog(self, val):
         self._backlog = val
 
+    def __repr__(self,):
+        with self.lock:
+            qs = [str(q) for q in self.subscribers]
+            string = super().__repr__() + ' with subscribers ' + ','.join(qs)
+        return string
+
     def __init__(self, maxsize=0, backlog=None):
         """ Create an Announcement object.
 
@@ -91,6 +98,9 @@ class Announcement:
             Note: If used, it is recommended to use the ``finalize()`` method so
             that the backlog can be free'd when no longer necessary.
         """
+
+        log.debug("Creating Announcement %X" % id(self))
+
         # General Attributes #
         self.subscribers = deque()
         self.maxsize = maxsize
@@ -153,6 +163,7 @@ class Announcement:
 
         with self.lock:
             if self.final:
+                log.error("%s Subscribe when announcement already finalized" % (self,))
                 raise SubscribeFinalizedError
 
             if q is None:
@@ -188,6 +199,7 @@ class Announcement:
 
         Only used for memory efficiency if backlog is used.
         """
+        log.debug("%s finalizing" % str(self))
 
         self.final = True
         if not self.backlog_use:
