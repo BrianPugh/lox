@@ -2,6 +2,19 @@
 History
 =======
 
+0.5.0 (2019-07-01)
+------------------
+
+* New Object: ``lox.Announcement``. Allows a one-to-many thread queue with 
+  backlog support so that late subscribers can still get all (or most recent) 
+  announcements before they subscribed.
+
+* New Feature: ``lox.thread``  ``scatter`` calls can now be chained together.
+  ``scatter`` now returns an ``int`` subclass that contains metadata to allow 
+  chaining. Each scatter call can have a maximum of 1 previous ``scatter`` result.
+
+* Documentation updates, theming, and logos
+
 0.4.3 (2019-06-24)
 ------------------
 * Garbage collect cached decorated object methods
