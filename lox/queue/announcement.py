@@ -124,7 +124,7 @@ class Announcement:
 
     @classmethod
     def clone(cls, ann, q:queue.Queue=None):
-        """ Create a new reference object that shares subscribers and resources
+        """ Create a new announcement object that shares subscribers and resources
         with an existing announcement.
 
         Only difference from cloned announcement is a new receive queue is created.
