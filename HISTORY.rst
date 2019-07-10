@@ -2,6 +2,16 @@
 History
 =======
 
+0.6.0 (TBD)
+-----------
+
+* ``lox.Announcement`` ``subscribe()`` calls now return another ``Announcement``
+  object that behaves like a queue instead of an actual queue. Allows for 
+  many-queue-to-many-queue communications.
+
+* New Object: ``lox.Funnel``. allows for waiting on many queues for a complete
+  set of inputs indicated by a job ID.
+
 0.5.0 (2019-07-01)
 ------------------
 

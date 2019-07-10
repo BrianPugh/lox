@@ -49,3 +49,8 @@ Announcement
 .. autoclass:: lox.queue.Announcement
    :members:
 
+Funnel
+^^^^^^
+.. autoclass:: lox.queue.Funnel
+   :members:
+
