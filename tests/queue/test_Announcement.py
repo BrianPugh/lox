@@ -1,4 +1,5 @@
 import lox
+from lox import Announcement
 from threading import Lock, Thread
 from time import sleep
 import queue
@@ -14,8 +15,8 @@ def test_1():
     foo_q = ann.subscribe()
     bar_q = ann.subscribe()
 
-    assert(isinstance(foo_q, queue.Queue))
-    assert(isinstance(bar_q, queue.Queue))
+    assert(isinstance(foo_q, lox.Announcement))
+    assert(isinstance(bar_q, lox.Announcement))
     assert( foo_q != bar_q )
 
     def foo():
@@ -105,3 +106,65 @@ def test_3():
     except lox.SubscribeFinalizedError:
         return
     assert(False) # Should never reach here
+
+def test_4():
+    """ Testing many-to-many capability.
+    """
+
+    ann_foo = Announcement()
+    ann_bar = ann_foo.subscribe()
+    ann_baz = ann_bar.subscribe()
+
+    ann_foo.put(1)
+
+    assert( ann_bar.get() == 1 )
+    assert( ann_baz.get() == 1 )
+
+    ann_bar.put(2)
+    assert( ann_foo.get() == 2 )
+    assert( ann_baz.get() == 2 )
+
+    ann_bar.put(3)
+    assert( ann_foo.get() == 3 )
+    assert( ann_baz.get() == 3 )
+
+def test_5():
+    """ Testing many-to-many backlog and finalization.
+    """
+
+    ann_foo = lox.Announcement(backlog=-1)
+    ann_bar = ann_foo.subscribe()
+
+    ann_foo.put(1)
+    ann_foo.put(3)
+    ann_foo.put(7)
+
+    assert( ann_bar.get() == 1 )
+    assert( ann_bar.get() == 3 )
+    assert( ann_bar.get() == 7 )
+
+    ann_baz = ann_bar.subscribe()
+
+    assert( ann_baz.get() == 1 )
+    assert( ann_baz.get() == 3 )
+    assert( ann_baz.get() == 7 )
+
+    ann_boo = ann_bar.subscribe()
+    ann_boo.finalize()
+
+    assert( ann_boo.get() == 1 )
+    assert( ann_boo.get() == 3 )
+    assert( ann_boo.get() == 7 )
+
+    try:
+        ann_boo.get(timeout=0.01)
+        assert(0) # Above get should raise exception
+    except queue.Empty:
+        pass
+
+    try:
+        ann_bloop = ann_foo.subscribe()
+        assert( 0 ) # Should raise exception
+    except lox.SubscribeFinalizedError:
+        pass
+

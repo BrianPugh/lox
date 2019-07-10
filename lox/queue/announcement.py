@@ -1,6 +1,7 @@
 """
 .. module:: announcement
-   :synopsis: Queue elements for multiple recipients.
+   :synopsis: Many-to-many queue recipients with backlog support for race 
+   condition subscribing or lazy subscribing.
 """
 
 
@@ -77,8 +78,8 @@ class Announcement:
 
     def __repr__(self,):
         with self.lock:
-            qs = [str(q) for q in self.subscribers]
-            string = super().__repr__() + ' with subscribers ' + ','.join(qs)
+            qs = [str(id(ann.q)) for ann in self.subscribers]
+            string = super().__repr__() + ' with subscriber queues ' + ','.join(qs)
         return string
 
     def __init__(self, maxsize=0, backlog=None):
@@ -108,6 +109,8 @@ class Announcement:
         self.subscribers = deque()
         self.maxsize = maxsize
         self.lock = threading.RLock()
+        self.q = queue.Queue(maxsize=self.maxsize)
+        self.subscribers.append(self)
 
         # Backlog objects #
         self.backlog_use = False if backlog is None else True
@@ -119,6 +122,36 @@ class Announcement:
         else:
             self.backlog = None
 
+    @classmethod
+    def clone(cls, ann, q:queue.Queue=None):
+        """ Create a new reference object that shares subscribers and resources
+        with an existing announcement.
+
+        Only difference from cloned announcement is a new receive queue is created.
+
+        Parameters
+        ----------
+        ann : lox.Announcement
+            Announcement object to clone from
+
+        q : queue.Queue
+            Receiving queue. If ``None``, a new one is created.
+
+        Returns
+        -------
+        Announcement
+           New Announcement object with copied attributes, but new ``q``
+        """
+
+        new_ann = cls()
+        new_ann.lock = ann.lock
+        with new_ann.lock:
+            new_ann.subscribers = ann.subscribers
+            new_ann.maxsize     = ann.maxsize
+            new_ann.q = queue.Queue(maxsize=self.maxsize) if q is None else q
+            new_ann.backlog_use = ann.backlog_use
+            new_ann.backlog     = ann.backlog
+        return new_ann
 
     def __len__(self,):
         """ Get the number of subscribers.
@@ -131,21 +164,102 @@ class Announcement:
 
         return len(self.subscribers)
 
-    def put(self, data, *args, **kwargs):
-        """ Push data to all subscribed queues.
+    def qsize(self,):
+        """ Return the approximate size of the receive queue. Note, qsize() > 0 
+        doesn’t guarantee that a subsequent get() will not block, nor will 
+        qsize() < maxsize guarantee that put() will not block.
+
+        Returns
+        -------
+        int
+            approximate size of the receive queue.
+        """
+
+        return self.q.qsize()
+
+    def empty(self,):
+        """ Return ``True`` if the receive queue is empty, ``False`` otherwise. 
+        If ``empty()`` returns ``True`` it doesn’t guarantee that a subsequent 
+        call to ``put()`` will not block. Similarly, if ``empty()`` returns 
+        ``False`` it doesn’t guarantee that a subsequent call to ``get()`` 
+        will not block.
+
+        Returns
+        -------
+        bool
+            ``True`` if the receive queue is currently empty; ``False`` otherwise.
+        """
+
+        return self.q.empty()
+
+    def full(self,):
+        """ Return ``True`` if the receive queue is full, ``False`` otherwise. 
+        If ``full()`` returns ``True`` it doesn’t guarantee that a subsequent 
+        call to ``get()`` will not block. Similarly, if ``full()`` returns 
+        ``False`` it doesn’t guarantee that a subsequent call to ``put()`` 
+        will not block.
+
+        Returns
+        -------
+        bool
+            ``True`` if the receive queue is currently full; ``False`` otherwise.
+        """
+
+        return self.q.full()
+
+    def put(self, item, block=True, timeout=None, ):
+        """ Put item into all subscribers' queues. 
 
         Parameters
         ----------
-        data : object
-            Data to put on the queue.
-        """
-        with self.lock:
-            for q in self.subscribers:
-                q.put(data, *args, **kwargs)
-            if self.backlog_use and not self.final:
-                self.backlog.append(data)
+        item
+           data to put onto all subscribers' queues
 
-    def subscribe(self, q=None, maxsize=None, *args, **kwargs):
+        block : bool
+            Block until data is put on queues or timeout.
+
+        timeout : float
+            Wait up to ``timeout`` seconds before raising ``queue.Full``.
+            Defaults to no timeout.
+        """
+
+        with self.lock:
+            for ann in self.subscribers:
+                if ann == self:
+                    log.debug("Skipping receiver Announcement %s" % ann)
+                    continue
+                else:
+                    log.debug("Putting to Announcement %s" % str(ann))
+
+                ann.q.put(item, block=block, timeout=timeout)
+            if self.backlog_use and not self.final:
+                self.backlog.append(item)
+
+    def get(self, block=True, timeout=None):
+        """ Get from the receive queue. 
+
+        Parameters
+        ----------
+        block : bool
+            Block until data is obtained from receive queue or timeout.
+
+        timeout : float
+            Wait up to ``timeout`` seconds before raising ``queue.Full``.
+            Defaults to no timeout.
+
+        Returns
+        -------
+            item from receive queue.
+
+        Raises
+        ------
+        queue.Empty
+             When there are no elements in queue and timeout has been reached.
+        """
+
+        return self.q.get(block=block, timeout=timeout)
+
+    def subscribe(self, q=None, maxsize=None, block=True, timeout=None):
         """ Subscribe to announcements.
 
         Parameters
@@ -158,10 +272,17 @@ class Announcement:
             Created queue's maximum size. Overrides Announcement's default 
             maximum size. Ignored if ``q`` is provided.
 
+        block : bool
+            Block until data from backlog is put on queues or timeout.
+
+        timeout : float
+            Wait up to ``timeout`` seconds before raising ``queue.Full``.
+            Defaults to no timeout.
+
         Returns
         -------
-        Queue
-            Queue-like object for receiver to ``get`` data from.
+        Announcement
+            object for receiver to ``get`` and ``put`` data from.
         """
 
         with self.lock:
@@ -174,11 +295,12 @@ class Announcement:
                 if maxsize is None:
                     maxsize = self.maxsize
                 q = queue.Queue( maxsize=maxsize )
-            self.subscribers.append(q)
+            ann = Announcement.clone(self, q)
+            self.subscribers.append(ann)
             if self.backlog_use:
                 for x in self.backlog:
-                    q.put(x, *args, **kwargs)
-        return q
+                    q.put(x, block=block, timeout=timeout)
+        return ann
 
     def unsubscribe(self, q):
         """ Remove the queue from queue-list. Will no longer receive announcements.
@@ -200,12 +322,12 @@ class Announcement:
     def finalize(self,):
         """ Do not allow any more subscribers.
 
-        Only used for memory efficiency if backlog is used.
+        Primarily used for memory efficiency if backlog is used.
         """
-        log.debug("%s finalizing" % str(self))
 
-        self.final = True
-        if not self.backlog_use:
-            return
-        self.backlog = None
+        with self.lock:
+            for ann in self.subscribers:
+                log.debug("%s finalizing" % str(ann))
+                ann.final = True
+                ann.backlog = None
 
