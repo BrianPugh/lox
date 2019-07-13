@@ -3,18 +3,6 @@
    :synopsis: Wait on many queues.
 
 Wait on a queue until a set of inputs are ready.
-
-Example usecase:
-    Lets say 2 parallel algorithms:
-        1. AlgoX computes the square of a number ``n``.
-        2. AlgoY computes the squareroot of a number ``n``.
-    Finally, lets say a third algorithm computes the sum:
-        3. AlgoZ computes AlgoX + AlgoY
-    AlgoX and AlgoY can be performed in parallel; however, AlgoZ requires a 
-    pair of inputs to perform its computation. AlgoX and AlgoY could put their 
-    results on a queue as they complete their tasks, but it's complicated for 
-    AlgoZ to ``get`` a pair of matched items from both queues. **Funnel** 
-    allows AlgoZ to easily wait on and ``get`` a pair from the 2 queues.
 """
 
 
@@ -23,16 +11,19 @@ from collections import deque
 import threading
 import logging as log
 
-__all__ = ["Funnel", "FunnelPut",]
+__all__ = ["Funnel", "FunnelPutError", "FunnelPutTopError",]
 
-class FunnelPut(Exception):
+class FunnelPutError(Exception):
     """ Cannot ``put`` to a top/master Funnel object;
     can only ``put`` to subscribers.
     """
 
     pass
 
-class FunnelPutTop(Exception):
+class FunnelPutTopError(Exception):
+    """ Can only put onto subscribers, not the top/master ``Funnel``.
+    """
+
     pass
 
 class FunnelElement:
@@ -57,6 +48,32 @@ class FunnelElement:
 
 class Funnel:
     """ Wait on many queues.
+
+    .. doctest::
+
+        >>> funnel = lox.Funnel()
+        >>> sub_1 = funnel.subscribe()
+        >>> sub_2 = funnel.subscribe()
+
+        >>> sub_1.put('foo', 'job_id')
+        >>> try:
+        ...     res = funnel.get(timeout=0.01)
+        ... except queue.Empty:
+        ...     print("Timed Out")
+        Timed Out
+        >>> sub_2.put('bar', 'job_id')
+        >>> res = funnel.get()
+        >>> print(len(res))
+        3
+        >>> print(res)
+        ['job_id','foo','bar']
+
+
+    Attributes
+    ----------
+    index : int
+        Index into list of solutions (if a subscriber). ``-1`` otherwise.
+        Note: if ``get(return_jid=True)`` then this is offset by one.
     """
 
     def __init__(self):
@@ -147,12 +164,12 @@ class Funnel:
 
         Raises
         ------
-        FunnelPutTop
+        FunnelPutTopError
            Can only put onto subscribers, not the top/master ``Funnel``.
         """
 
         if self.index < 0:
-            raise FunnelPutTop
+            raise FunnelPutTopError
 
         if self.lock.acquire(blocking=blocking, timeout=timeout) == False:
             return False
