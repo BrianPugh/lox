@@ -2,7 +2,7 @@
 History
 =======
 
-0.6.0 (TBD)
+0.6.0 (2019-07-21)
 -----------
 
 * ``lox.Announcement`` ``subscribe()`` calls now return another ``Announcement``
