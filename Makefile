@@ -86,3 +86,12 @@ dist: clean ## builds source and wheel package
 
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
+
+dev:
+	pip3 install -r requirements_dev.txt
+	pip3 install -r requirements.txt
+	pip3 install -e .
+
+package:
+	python3 setup.py sdist
+	python3 setup.py bdist_wheel
