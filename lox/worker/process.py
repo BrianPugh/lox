@@ -43,7 +43,7 @@ class _ProcessWrapper(WorkerWrapper):
         if n_workers is None:
             n_workers = mp.cpu_count()
         super().__init__(n_workers, func)
-        self.pool = mp.Pool(n_workers)
+        self.pool = None
 
     def __len__(self):
         """ 
@@ -69,6 +69,8 @@ class _ProcessWrapper(WorkerWrapper):
         int
             Index into solution list.
         """
+        if self.pool is None:
+            self.pool = mp.Pool(self.n_workers,)
         self.response.append(self.pool.apply_async(self.func, args=args, kwds=kwargs))
         return len(self.response)-1
 
@@ -82,8 +84,12 @@ class _ProcessWrapper(WorkerWrapper):
             Results in order scatter'd
         """
 
+        self.pool.close()
+        self.pool.join()
+        del self.pool
         fetched = [x.get() for x in self.response]
         self.response = deque()
+        self.pool = None
         return fetched
 
 def process(n_workers):
