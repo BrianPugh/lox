@@ -2,8 +2,12 @@
 History
 =======
 
+0.6.1 (2019-07-21)
+------------------
+* Fix memory leak in ``lox.process``.
+
 0.6.0 (2019-07-21)
------------
+------------------
 
 * ``lox.Announcement`` ``subscribe()`` calls now return another ``Announcement``
   object that behaves like a queue instead of an actual queue. Allows for 
