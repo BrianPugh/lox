@@ -3,11 +3,13 @@
 
 """The setup script."""
 
-import os, sys
+import os
+import sys
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 
-version='0.6.1'
+version = '0.6.1'
+
 
 class VerifyVersionCommand(install):
     """Custom command to verify that the git tag matches our version
@@ -25,6 +27,7 @@ class VerifyVersionCommand(install):
                 tag, version
             )
             sys.exit(info)
+
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()

@@ -5,4 +5,4 @@ Objects to help shuttle data beteween tasks.
 """
 
 from .announcement import *
-from .funnel import * 
+from .funnel import *

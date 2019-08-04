@@ -32,14 +32,14 @@ class RWLock:
     def __init__(self):
         """ Create RWLock object """
 
-        self._no_writers    = Lock()
-        self._no_readers    = Lock()
-        self.read_counter   = LightSwitch(self._no_writers)
+        self._no_writers = Lock()
+        self._no_readers = Lock()
+        self.read_counter = LightSwitch(self._no_writers)
         self._write_counter = LightSwitch(self._no_readers)
         self._readers_queue = Lock()
 
     @contextmanager
-    def __call__(self, rw_flag:str, timeout=-1):
+    def __call__(self, rw_flag: str, timeout=-1):
         """ Used in contextmanager to specify acquire/release type """
 
         self.acquire(rw_flag, timeout=timeout)
@@ -71,7 +71,7 @@ class RWLock:
             raise ValueError("rw_flag must be 'r' or 'w'")
         return rw_flag
 
-    def acquire(self, rw_flag:str, timeout=-1):
+    def acquire(self, rw_flag: str, timeout=-1):
         """ Acquire the lock as a "reader" or a "writer".
 
         Parameters
@@ -114,7 +114,7 @@ class RWLock:
                 self._write_counter.release()
         return obtained
 
-    def release(self, rw_flag:str):
+    def release(self, rw_flag: str):
         """Release acquired lock.
 
         Parameters
@@ -129,4 +129,3 @@ class RWLock:
         elif rw_flag == 'w':
             self._no_writers.release()
             self._write_counter.release()
-

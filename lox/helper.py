@@ -7,20 +7,24 @@ import sys
 import gc
 
 
-__all__ = ["auto_adapt_to_methods", "MethodDecoratorAdaptor", "term_colors",]
+__all__ = ["auto_adapt_to_methods", "MethodDecoratorAdaptor", "term_colors", ]
 
-cdf = {} # cached (decorator, func)
-cdfi = {} # cached (instance, owner, decorator, func)
+cdf = {}  # cached (decorator, func)
+cdfi = {}  # cached (instance, owner, decorator, func)
+
 
 def cdfi_gc_cb(phase, info):
     """ Garbage Collector callback to free deleted cdfi entries"""
 
     global cdfi
     if phase == "start":
-        remove = [k for k,v in cdfi.items() if sys.getrefcount(v.func.__self__) <= 3]
-        for k in remove: del cdfi[k]
+        remove = [k for k, v in cdfi.items() if sys.getrefcount(v.func.__self__) <= 3]
+        for k in remove:
+            del cdfi[k]
+
 
 gc.callbacks.append(cdfi_gc_cb)
+
 
 class MethodDecoratorAdaptor:
     """ Class that allows the same decorator apply to methods and functions """
@@ -64,12 +68,13 @@ class MethodDecoratorAdaptor:
 def auto_adapt_to_methods(decorator):
     """Decorator that allows you to use the same decorator on methods and 
     functions, hiding the self argument from the decorator.
-    
+
     Source: https://stackoverflow.com/a/1288936"""
 
     def adapt(func):
         return MethodDecoratorAdaptor(decorator, func)
     return adapt
+
 
 class term_colors:
     """ Escape sequences to colorize text in the terminal """
@@ -83,7 +88,7 @@ class term_colors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-    def __init__(self, color:str):
+    def __init__(self, color: str):
         self.color = color.lower()
 
     def __enter__(self, ):
@@ -106,4 +111,3 @@ class term_colors:
 
     def __exit__(self, type, value, traceback):
         print(self.ENDC, end='', flush=True)
-

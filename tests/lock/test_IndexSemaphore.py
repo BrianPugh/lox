@@ -7,9 +7,10 @@ SLEEP_TIME = 0.01
 n_resource = 5
 n_threads = 20
 
+
 def test_multithread_args():
     resp = deque()
-    sem = IndexSemaphore( n_resource )
+    sem = IndexSemaphore(n_resource)
     locks = [Lock() for _ in range(n_resource)]
 
     def func():
@@ -25,7 +26,7 @@ def test_multithread_args():
             resp.append(False)
         sem.release(index)
 
-    threads = [ Thread(target=func) for _ in range(n_threads) ]
+    threads = [Thread(target=func) for _ in range(n_threads)]
 
     for t in threads:
         t.start()
@@ -33,11 +34,12 @@ def test_multithread_args():
         t.join()
     for r in resp:
         assert r
-    assert( len(resp) == n_threads )
+    assert(len(resp) == n_threads)
+
 
 def test_multithread_no_args():
     resp = deque()
-    sem = IndexSemaphore( n_resource )
+    sem = IndexSemaphore(n_resource)
     locks = [Lock() for _ in range(n_resource)]
 
     def func():
@@ -53,7 +55,7 @@ def test_multithread_no_args():
             resp.append(False)
         sem.release(index)
 
-    threads = [ Thread(target=func) for _ in range(n_threads) ]
+    threads = [Thread(target=func) for _ in range(n_threads)]
 
     for t in threads:
         t.start()
@@ -61,12 +63,12 @@ def test_multithread_no_args():
         t.join()
     for r in resp:
         assert r
-    assert( len(resp) == n_threads )
+    assert(len(resp) == n_threads)
 
 
 def test_multithread_context_args():
     resp = deque()
-    sem = IndexSemaphore( n_resource )
+    sem = IndexSemaphore(n_resource)
     locks = [Lock() for _ in range(n_resource)]
 
     def func():
@@ -81,7 +83,7 @@ def test_multithread_context_args():
                 # timeout (bad)
                 resp.append(False)
 
-    threads = [ Thread(target=func) for _ in range(n_threads) ]
+    threads = [Thread(target=func) for _ in range(n_threads)]
 
     for t in threads:
         t.start()
@@ -89,11 +91,12 @@ def test_multithread_context_args():
         t.join()
     for r in resp:
         assert r
-    assert( len(resp) == n_threads )
+    assert(len(resp) == n_threads)
+
 
 def test_multithread_context_no_args():
     resp = deque()
-    sem = IndexSemaphore( n_resource )
+    sem = IndexSemaphore(n_resource)
     locks = [Lock() for _ in range(n_resource)]
 
     def func():
@@ -108,7 +111,7 @@ def test_multithread_context_no_args():
                 # timeout (bad)
                 resp.append(False)
 
-    threads = [ Thread(target=func) for _ in range(n_threads) ]
+    threads = [Thread(target=func) for _ in range(n_threads)]
 
     for t in threads:
         t.start()
@@ -116,19 +119,20 @@ def test_multithread_context_no_args():
         t.join()
     for r in resp:
         assert r
-    assert( len(resp) == n_threads )
+    assert(len(resp) == n_threads)
+
 
 def test_invalid_constructor():
     try:
-        sem = IndexSemaphore( 0 )
+        sem = IndexSemaphore(0)
         assert False
     except ValueError:
         assert True
 
-def test_timeout():
-    sem = IndexSemaphore( 1 )
-    with sem(timeout=None) as index1:
-        assert( index1 == 0 )
-        with sem(timeout=0.1) as index2:
-           assert index2 is None
 
+def test_timeout():
+    sem = IndexSemaphore(1)
+    with sem(timeout=None) as index1:
+        assert(index1 == 0)
+        with sem(timeout=0.1) as index2:
+            assert index2 is None

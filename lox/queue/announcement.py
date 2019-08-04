@@ -12,12 +12,14 @@ import logging as log
 
 __all__ = ["Announcement", "SubscribeFinalizedError", ]
 
+
 class SubscribeFinalizedError(Exception):
     """ Raised when an Announcement.subscribe has been called,
     but the Announcement has already been finalized.
     """
 
     pass
+
 
 class Announcement:
     """ Push to many queues with backlog support.
@@ -64,7 +66,7 @@ class Announcement:
         return self._final
 
     @final.setter
-    def final(self, val : bool):
+    def final(self, val: bool):
         with self.lock:
             self._final = val
 
@@ -123,7 +125,7 @@ class Announcement:
             self.backlog = None
 
     @classmethod
-    def clone(cls, ann, q:queue.Queue=None):
+    def clone(cls, ann, q: queue.Queue = None):
         """ Create a new announcement object that shares subscribers and resources
         with an existing announcement.
 
@@ -147,10 +149,10 @@ class Announcement:
         new_ann.lock = ann.lock
         with new_ann.lock:
             new_ann.subscribers = ann.subscribers
-            new_ann.maxsize     = ann.maxsize
+            new_ann.maxsize = ann.maxsize
             new_ann.q = queue.Queue(maxsize=self.maxsize) if q is None else q
             new_ann.backlog_use = ann.backlog_use
-            new_ann.backlog     = ann.backlog
+            new_ann.backlog = ann.backlog
         return new_ann
 
     def __len__(self,):
@@ -294,7 +296,7 @@ class Announcement:
                 # Create Queue
                 if maxsize is None:
                     maxsize = self.maxsize
-                q = queue.Queue( maxsize=maxsize )
+                q = queue.Queue(maxsize=maxsize)
             ann = Announcement.clone(self, q)
             self.subscribers.append(ann)
             if self.backlog_use:
@@ -330,4 +332,3 @@ class Announcement:
                 log.debug("%s finalizing" % str(ann))
                 ann.final = True
                 ann.backlog = None
-

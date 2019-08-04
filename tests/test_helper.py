@@ -1,9 +1,11 @@
 import lox
 from lox.helper import term_colors, cdf, cdfi
 from time import sleep, time
-import sys, gc
+import sys
+import gc
 
 SLEEP_TIME = 0.01
+
 
 def test_ctx(capsys):
     with capsys.disabled():
@@ -39,12 +41,13 @@ class Class1:
         sleep(SLEEP_TIME)
         return x*y - self.z
 
+
 def test_MethodDecoratorAdaptor_gc():
     len_cdfi = len(cdfi)
-    
+
     for i in range(100):
         obj = Class1(i)
-        obj.test_method1.scatter(i,i+1)
+        obj.test_method1.scatter(i, i+1)
         obj.test_method1.gather()
         del obj
     gc.collect()

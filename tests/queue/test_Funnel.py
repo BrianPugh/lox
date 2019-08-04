@@ -4,6 +4,7 @@ from threading import Lock, Thread
 from time import sleep
 import queue
 
+
 def test_1():
     """ Test most basic usecase with 1 subscribers.
     """
@@ -16,6 +17,7 @@ def test_1():
     assert(res[0] == 'job_id')
     assert(res[1] == 'foo')
     assert(funnel.d == {})
+
 
 def test_2():
     """ Test most basic usecase with 2 subscribers.

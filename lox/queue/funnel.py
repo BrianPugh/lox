@@ -11,7 +11,8 @@ from collections import deque
 import threading
 import logging as log
 
-__all__ = ["Funnel", "FunnelPutError", "FunnelPutTopError",]
+__all__ = ["Funnel", "FunnelPutError", "FunnelPutTopError", ]
+
 
 class FunnelPutError(Exception):
     """ Cannot ``put`` to a top/master Funnel object;
@@ -20,11 +21,13 @@ class FunnelPutError(Exception):
 
     pass
 
+
 class FunnelPutTopError(Exception):
     """ Can only put onto subscribers, not the top/master ``Funnel``.
     """
 
     pass
+
 
 class FunnelElement:
 
@@ -81,7 +84,7 @@ class Funnel:
         """
 
         self.lock = threading.RLock()
-        self.index = -1 # Index into list of solutions
+        self.index = -1  # Index into list of solutions
         self.subscribers = deque()
         self.d = {}
         self.q = queue.Queue()          # Object that complete sets are placed on.
@@ -105,7 +108,7 @@ class Funnel:
         """
 
         new_funnel = cls()
-        new_funnel.lock = funnel.lock 
+        new_funnel.lock = funnel.lock
 
         with new_funnel.lock:
             new_funnel.d = funnel.d
@@ -189,7 +192,7 @@ class Funnel:
         # Add item to queue if all subscribers are accounted for.
         if all([elem.complete for elem in self.d[jid]]):
             log.debug("JID \"%s\" complete; putting onto queue %s" % (str(jid), str(self.q)))
-            self.q.put(tuple([jid,] + [elem.item for elem in self.d[jid]]))
+            self.q.put(tuple([jid, ] + [elem.item for elem in self.d[jid]]))
             del self.d[jid]
 
         self.lock.release()

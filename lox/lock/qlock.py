@@ -96,7 +96,7 @@ class QLock:
 
     def release(self):
         """ Release exclusive access to resource.
-        
+
         Exception
         ---------
         ValueError
