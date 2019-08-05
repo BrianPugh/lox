@@ -10,7 +10,7 @@ __all__ = ["WorkerWrapper", "ScatterPromise"]
 
 
 class WorkerWrapper(ABC):
-    """Worker helper decorator
+    """ Worker helper decorator.
 
     Methods
     -------
