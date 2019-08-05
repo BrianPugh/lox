@@ -39,6 +39,7 @@ from .worker import WorkerWrapper, ScatterPromise
 
 __all__ = ["thread", ]
 
+
 class Job:
     """ Elements on the Job Queue
 
@@ -66,22 +67,23 @@ class Job:
 
     def __str__(self):
         return "(index=%s, func=%s, pre_args=%s, args=%s, post_args=%s, kwargs=%s)" % \
-                ( str(self.index), str(self.func),
-                        str(self.pre_args), str(self.args), str(self.post_args)
-                        , str(self.kwargs) )
+            (str(self.index), str(self.func),
+             str(self.pre_args), str(self.args), str(self.post_args), str(self.kwargs))
 
-Result = namedtuple('Result', ['index', 'value',])
+
+Result = namedtuple('Result', ['index', 'value', ])
+
 
 class _ThreadWorker(threading.Thread):
     """Thread worker created on-demand by _ThreadWrapper
     """
 
     def __init__(self, job_queue, res_queue, res, worker_sem, lightswitch, **kwargs):
-        self.job_queue   = job_queue   # Queue to pop jobs off of
-        self.res_queue   = res_queue   # Queue to push results onto
-        self.res         = res         # deque object to place results in
-        self.worker_sem  = worker_sem  # object to "release()" upon worker destruction
-        self.lightswitch = lightswitch # object to "release()" upon job completion
+        self.job_queue = job_queue   # Queue to pop jobs off of
+        self.res_queue = res_queue   # Queue to push results onto
+        self.res = res         # deque object to place results in
+        self.worker_sem = worker_sem  # object to "release()" upon worker destruction
+        self.lightswitch = lightswitch  # object to "release()" upon job completion
         super().__init__(**kwargs)
 
     def run(self, ):
@@ -98,29 +100,35 @@ class _ThreadWorker(threading.Thread):
             try:
                 job = self.job_queue.get(timeout=0)
                 try:
-                    log.debug("Executing decorated function %s with pre_args %s, args %s, post_args %s, and kwargs %s" \
-                            % (str(job.func), str(job.pre_args), str(job.args), str(job.post_args), str(job.kwargs)))
-                    self.res[job.index] = job.func(*job.pre_args, *job.args, *job.post_args, **job.kwargs)
-                except Exception as e:
+                    log.debug("Executing decorated function %s with pre_args %s, "
+                              "args %s, post_args %s, and kwargs %s" % (
+                                  str(job.func), str(job.pre_args),
+                                  str(job.args), str(job.post_args),
+                                  str(job.kwargs)
+                              ))
+                    self.res[job.index] = job.func(
+                        *job.pre_args, *job.args, *job.post_args, **job.kwargs)
+                except Exception:
                     with term_colors("red"):
                         print(traceback.format_exc())
                 finally:
                     result = Result(job.index, self.res[job.index])
                     log.debug("Placing %s onto res_queue %s" % (str(result), str(self.res_queue)))
                     self.res_queue.put(result)
-                    self.lightswitch.release() 
+                    self.lightswitch.release()
             except queue.Empty:
                 # Allow worker to self-terminate
                 break
-        self.worker_sem.release() # indicate worker is terminated
+        self.worker_sem.release()  # indicate worker is terminated
         return
+
 
 class _PromiseForwarder(threading.Thread):
     """ Forwards Promises from the announcement to the job queue. """
 
     sleep_time = 0.01
 
-    def __init__( self, thread_wrapper, **kwargs ):
+    def __init__(self, thread_wrapper, **kwargs):
         """ Create a _PromiseForwarder object
 
         Parameters
@@ -142,7 +150,8 @@ class _PromiseForwarder(threading.Thread):
                 break
 
             # Get a result from the previous stage
-            log.debug("Trying to get from res_queue %s" % (str(self.thread_wrapper.prev_promise_q),))
+            log.debug("Trying to get from res_queue %s" %
+                      (str(self.thread_wrapper.prev_promise_q),))
             try:
                 # Timeout so we can poll the self._kill attribute
                 result = self.thread_wrapper.prev_promise_q.get(timeout=1)
@@ -207,19 +216,20 @@ class _ThreadWrapper(WorkerWrapper):
         """
         super().__init__(n_workers, func)
 
-        self.job_queue = queue.Queue() # Queue to put jobs on
+        self.job_queue = queue.Queue()  # Queue to put jobs on
         self.jobs_complete_lock = Lock()
-        self.job_lightswitch = LightSwitch(self.jobs_complete_lock) # Used to determine if all jobs have been completed
+        # Used to determine if all jobs have been completed
+        self.job_lightswitch = LightSwitch(self.jobs_complete_lock)
 
         self.workers_sem = BoundedSemaphore(self.n_workers)
-        self.daemon      = daemon
+        self.daemon = daemon
         self.enable_auto_unpacking()
 
         self.clear()
 
     def clear(self):
         log.debug("_ThreadWrapper clearing")
-        self.res_queue = Announcement(backlog=0) # Queue to put results on
+        self.res_queue = Announcement(backlog=0)  # Queue to put results on
         self.promise_forwarder = None  # Thread handle for the promise forwarding task
         self.promises = deque()        # List of promises
         self.jobs = deque()            # list of jobs;
@@ -253,7 +263,7 @@ class _ThreadWrapper(WorkerWrapper):
 
         if self.workers_sem.acquire(timeout=0):
             _ThreadWorker(self.job_queue, self.res_queue, self.response,
-                    self.workers_sem, self.job_lightswitch, daemon=self.daemon).start()
+                          self.workers_sem, self.job_lightswitch, daemon=self.daemon).start()
 
     def _create_promise_forwarder(self):
         """ Create promise forwarding thread. """
@@ -265,7 +275,7 @@ class _ThreadWrapper(WorkerWrapper):
 
     def _dispatch_job(self, job):
         self.job_queue.put(job)
-        self._create_worker() # Create a thread if we are not at capacity
+        self._create_worker()  # Create a thread if we are not at capacity
 
     def scatter(self, *args, detect_chaining=True, **kwargs):
         """Enqueue a job to be processed by workers.
@@ -289,7 +299,11 @@ class _ThreadWrapper(WorkerWrapper):
             for arg in args:
                 if isinstance(arg, ScatterPromise):
                     if prev_promise:
-                        raise ValueError("There can only be one promise. If your input takes more than one promise, you should probably be calling \"gather()\"")
+                        raise ValueError(
+                            "There can only be one promise. "
+                            "If your input takes more than one promise, "
+                            "you should probably be calling \"gather()\""
+                        )
                     else:
                         prev_promise = arg
                     continue
@@ -334,7 +348,7 @@ class _ThreadWrapper(WorkerWrapper):
         # Save res_queue backlog memory
         self._finalize()
 
-        with self.jobs_complete_lock: # Wait until all jobs are done
+        with self.jobs_complete_lock:  # Wait until all jobs are done
             log.debug("Gathering %s: jobs_complete_lock acquired" % (str(self.func)))
             response = list(self.response)
 
@@ -453,6 +467,7 @@ def thread(max_workers, daemon=None):
         # assume decorator with called as "lox.thread"
         func = max_workers
         return MethodDecoratorAdaptor(_ThreadWrapper, func)
+
 
 if __name__ == '__main__':
     import doctest

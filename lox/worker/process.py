@@ -33,7 +33,8 @@ import sys
 from .worker import WorkerWrapper
 from ..helper import auto_adapt_to_methods, MethodDecoratorAdaptor
 
-__all__ = ['process',]
+__all__ = ['process', ]
+
 
 class _ProcessWrapper(WorkerWrapper):
     """Process helper decorator.
@@ -92,6 +93,7 @@ class _ProcessWrapper(WorkerWrapper):
         self.pool = None
         return fetched
 
+
 def process(n_workers):
     """ Decorator to execute a function/method in multiple processes.
 
@@ -123,7 +125,7 @@ def process(n_workers):
     -------
     __call__( *args, **kwargs )
         Vanilla passthrough function execution. Default user function behavior.
-        
+
         Returns
         -------
         Decorated function return type.
@@ -164,6 +166,7 @@ def process(n_workers):
         # assume decorator with called as "lox.process"
         func = n_workers
         return MethodDecoratorAdaptor(_ProcessWrapper, func)
+
 
 if __name__ == '__main__':
     import doctest

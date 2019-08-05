@@ -3,11 +3,13 @@
 
 """The setup script."""
 
-import os, sys
+import os
+import sys
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 
-version='0.6.1'
+version = '0.6.1'
+
 
 class VerifyVersionCommand(install):
     """Custom command to verify that the git tag matches our version
@@ -26,8 +28,13 @@ class VerifyVersionCommand(install):
             )
             sys.exit(info)
 
+
 with open('README.rst') as readme_file:
     readme = readme_file.read()
+readme = readme.replace(
+        'assets/lox_200w.png', 
+        'https://raw.githubusercontent.com/BrianPugh/lox/master/assets/lox_200w.png',
+        )
 
 with open('HISTORY.rst') as history_file:
     history = history_file.read()

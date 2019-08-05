@@ -11,10 +11,12 @@ rw_lock = None
 resource = None
 resp = None
 
+
 def common_setup():
     global rw_lock, resp
     rw_lock = RWLock()
     resp = deque()
+
 
 def common_create_workers(func, n, *args):
     threads = []
@@ -28,20 +30,23 @@ def common_create_workers(func, n, *args):
 
     return threads, t_start
 
+
 def read_worker():
     global rw_lock, resp
     with rw_lock('r'):
         local_copy = copy(resource)
-        sleep(SLEEP_TIME) # to make sure that all workers are truley accessing the resource at the same time
+        sleep(SLEEP_TIME)
 
     resp.append(local_copy)
     return
+
 
 def write_worker(val):
     global rw_lock, resource
     with rw_lock('w'):
         resource = val
     return
+
 
 def test_RWLock_r():
     global rw_lock, resource, resp
@@ -54,10 +59,12 @@ def test_RWLock_r():
     t_end = time()
     t_diff = t_end-t_start
 
-    assert( N_WORKERS > 2 )
-    assert(t_diff < (N_WORKERS-1)*SLEEP_TIME) # for this to be true, readers have to access at same time (good)
+    assert(N_WORKERS > 2)
+    # for this to be true, readers have to access at same time (good)
+    assert(t_diff < (N_WORKERS-1)*SLEEP_TIME)
     for r in resp:
-        assert( r == resource)
+        assert(r == resource)
+
 
 def test_RWLock_w():
     global rw_lock, resource
@@ -70,14 +77,15 @@ def test_RWLock_w():
     for t in threads_w1:
         t.join()
 
-    assert( resource == new_val )
+    assert(resource == new_val)
+
 
 def test_RWLock_rw():
     global rw_lock, resource, resp
     common_setup()
     return
     resource = 0
-    soln = [0,]*N_WORKERS + [5,]*N_WORKERS
+    soln = [0, ]*N_WORKERS + [5, ]*N_WORKERS
 
     threads_r1, t_start_r1 = common_create_workers(read_worker, N_WORKERS)
     threads_w1, t_start_w1 = common_create_workers(write_worker, N_WORKERS, 5)
@@ -90,37 +98,39 @@ def test_RWLock_rw():
     for t in threads_r2:
         t.join()
 
-    for r,s in zip(resp, soln):
-        assert( r == s )
+    for r, s in zip(resp, soln):
+        assert(r == s)
+
 
 def test_RWLock_timeout():
-    lock = RWLock();
+    lock = RWLock()
 
-    assert True == lock.acquire('r', timeout=0.01)
-    assert False == lock.acquire('w', timeout=0.01)
-    assert True == lock.acquire('r', timeout=0.01)
+    assert(lock.acquire('r', timeout=0.01) is True)
+    assert(lock.acquire('w', timeout=0.01) is False)
+    assert(lock.acquire('r', timeout=0.01) is True)
     lock.release('r')
     lock.release('r')
 
-    assert True == lock.acquire('w', timeout=0.01)
-    assert False == lock.acquire('w', timeout=0.01)
-    assert False == lock.acquire('r', timeout=0.01)
+    assert(lock.acquire('w', timeout=0.01) is True)
+    assert(lock.acquire('w', timeout=0.01) is False)
+    assert(lock.acquire('r', timeout=0.01) is False)
     lock.release('w')
-   
+
 
 def test_bathroom_example():
     # Note: after the janitor exits, the remaining people are nondeterministic
     sol = [
-            "p_0_enter",
-            "p_0_exit",
-            "j_enter",
-            "j_exit",
-            ]
+        "p_0_enter",
+        "p_0_exit",
+        "j_enter",
+        "j_exit",
+    ]
 
     res = bathroom_example()[:4]
 
-    for r,s in zip(res, sol):
-        assert( r == s )
+    for r, s in zip(res, sol):
+        assert(r == s)
+
 
 def bathroom_example():
     """
@@ -134,23 +144,23 @@ def bathroom_example():
     sleep_time = 0.1
 
     def janitor():
-        with restroom('w'): # block until the restroom is no longer occupied
+        with restroom('w'):  # block until the restroom is no longer occupied
             res.append('j_enter')
-            print("(%0.3f s) Janitor  entered the restroom" % ( time() - t_start,))
-            sleep(sleep_time) # clean the restroom
+            print("(%0.3f s) Janitor  entered the restroom" % (time() - t_start,))
+            sleep(sleep_time)  # clean the restroom
             res.append('j_exit')
-            print("(%0.3f s) Janitor  exited  the restroom" % ( time() - t_start,))
+            print("(%0.3f s) Janitor  exited  the restroom" % (time() - t_start,))
 
-    def people( id ):
-        if id == 0: # Get the starting time of execution for display purposes
+    def people(id):
+        if id == 0:  # Get the starting time of execution for display purposes
             global t_start
             t_start = time()
-        with restroom('r'): # block if a janitor is in the restroom
+        with restroom('r'):  # block if a janitor is in the restroom
             res.append("p_%d_enter" % (id,))
-            print("(%0.3f s) Person %d entered the restroom" % ( time() - t_start, id,))
-            sleep(sleep_time) # use the restroom
+            print("(%0.3f s) Person %d entered the restroom" % (time() - t_start, id,))
+            sleep(sleep_time)  # use the restroom
             res.append("p_%d_exit" % (id,))
-            print("(%0.3f s) Person %d exited  the restroom" % ( time() - t_start, id,))
+            print("(%0.3f s) Person %d exited  the restroom" % (time() - t_start, id,))
 
     people_threads = [threading.Thread(target=people, args=(i,)) for i in range(n_people)]
     janitor_thread = threading.Thread(target=janitor)
@@ -158,9 +168,9 @@ def bathroom_example():
     for i, person in enumerate(people_threads):
         person.start()                 # Person i will now attempt to enter the restroom
         sleep(sleep_time * 0.6)        # wait for 60% the time a person spends in the restroom
-        if i==0:                       # While the first person is in the restroom...
+        if i == 0:                       # While the first person is in the restroom...
             janitor_thread.start()     # the janitor would like to enter. HOWEVER...
-                                       # A new person (until all n_people are done) enters every 0.5 seconds.
+            # A new person (until all n_people are done) enters every 0.5 seconds.
     # Wait for all threads to finish
     for t in people_threads:
         t.join()
@@ -186,7 +196,8 @@ def bathroom_example():
     # While the Janitor is waiting, he doesn't let anyone else into the room.
     # After Person 0, leaves the room, the Janitor enters.
     # After cleaning, the Janitor leaves at the 2.000 second mark.
-    # Ever since the janitor was waiting (at 0.500 s), Person 1, Person 2, Person 3, and Person 4 have been lining up to enter.
+    # Ever since the janitor was waiting (at 0.500 s), Person 1, Person 2,
+    # Person 3, and Person 4 have been lining up to enter.
     # Now that the Janitor left the restroom, all the waiting people go in at the same time.
     return res
 

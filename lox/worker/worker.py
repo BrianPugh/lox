@@ -8,6 +8,7 @@ import pathos.multiprocessing as mp
 
 __all__ = ["WorkerWrapper", "ScatterPromise"]
 
+
 class WorkerWrapper(ABC):
     """Worker helper decorator
 
@@ -34,12 +35,12 @@ class WorkerWrapper(ABC):
         self.n_workers = n_workers
 
         # Function metadata
-        self.func       = func
-        self.__name__   = func.__name__
-        self.__doc__    = func.__doc__
+        self.func = func
+        self.__name__ = func.__name__
+        self.__doc__ = func.__doc__
         self.__module__ = func.__module__
 
-        self.response = deque() # Stores gather'd user function responses
+        self.response = deque()  # Stores gather'd user function responses
 
     def __call__(self, *args, **kwargs):
         """ Vanilla execute the wrapped function. """
@@ -100,6 +101,5 @@ class ScatterPromise(int):
         if val < 0:
             raise ValueError("Value must be a non-negative index")
         new_obj = super(cls, cls).__new__(cls, val)
-        new_obj.dec = dec # Decorator object
+        new_obj.dec = dec  # Decorator object
         return new_obj
-

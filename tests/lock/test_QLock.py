@@ -4,12 +4,13 @@ from time import time, sleep
 
 SLEEP_TIME = 0.1
 
+
 def test_1():
     res = ""
     sol = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     qlock = QLock()
 
-    def worker( x ):
+    def worker(x):
         nonlocal res
         with qlock:
             res += x
@@ -19,7 +20,7 @@ def test_1():
         t = Thread(target=worker, args=(name,))
         t.start()
         threads.append(t)
-        sleep(SLEEP_TIME) # probably enough time for .acquire() to run
+        sleep(SLEEP_TIME)  # probably enough time for .acquire() to run
 
     # Wait for all threads to complete
     for t in threads:
@@ -28,10 +29,12 @@ def test_1():
     for r, s in zip(res, sol):
         assert r == s
 
+
 def test_timeout():
     qlock = QLock()
-    assert qlock.acquire()
-    assert False==qlock.acquire(timeout=SLEEP_TIME)
+    assert(qlock.acquire())
+    assert(qlock.acquire(timeout=SLEEP_TIME) is False)
+
 
 def test_perf_qlock(benchmark):
     lock = QLock()
@@ -40,6 +43,7 @@ def test_perf_qlock(benchmark):
     def acquire_release():
         lock.acquire()
         lock.release()
+
 
 def test_perf_lock(benchmark):
     lock = Lock()
