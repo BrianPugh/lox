@@ -17,9 +17,9 @@ def test_basic_args():
         return x * y
 
     # Vanilla function execution still works
-    assert(10 == worker_task(2, 5))
+    assert(worker_task(2, 5) == 10)
 
-    #assert( len(worker_task) == 0 )
+    assert(len(worker_task) == 0)
 
     for x, y in zip(in_x, in_y):
         worker_task.scatter(x, y)
@@ -294,8 +294,8 @@ def test_chaining_4():
 
     for x, y in zip(in_x, in_y):
         res1 = foo.scatter(x, y)
-        res2 = bar.scatter(res1, z=z)
-        res3 = baz.scatter(res1)
+        bar.scatter(res1, z=z)
+        baz.scatter(res1)
     bar_res = bar.gather()
     baz_res = baz.gather()
 

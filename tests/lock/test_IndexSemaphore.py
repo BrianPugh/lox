@@ -90,7 +90,7 @@ def test_multithread_context_args():
     for t in threads:
         t.join()
     for r in resp:
-        assert r
+        assert(r)
     assert(len(resp) == n_threads)
 
 
@@ -124,10 +124,10 @@ def test_multithread_context_no_args():
 
 def test_invalid_constructor():
     try:
-        sem = IndexSemaphore(0)
-        assert False
+        IndexSemaphore(0)
+        assert(False)
     except ValueError:
-        assert True
+        assert(True)
 
 
 def test_timeout():

@@ -163,12 +163,12 @@ def test_5():
 
     try:
         ann_boo.get(timeout=0.01)
-        assert(0)  # Above get should raise exception
+        assert(False)  # Above get should raise exception
     except queue.Empty:
         pass
 
     try:
-        ann_bloop = ann_foo.subscribe()
-        assert(0)  # Should raise exception
+        ann_foo.subscribe()  # Should raise exception
+        assert(False)
     except lox.SubscribeFinalizedError:
         pass

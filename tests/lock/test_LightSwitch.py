@@ -26,9 +26,9 @@ def test_LightSwitch_1():
 
     with counting_lock:
         acquired_lock = common_lock.acquire(timeout=0)
-        assert(acquired_lock == False)
+        assert(acquired_lock is False)
     acquired_lock = common_lock.acquire(timeout=0)
-    assert(acquired_lock == True)
+    assert(acquired_lock is True)
     common_lock.release()
 
 
@@ -50,8 +50,8 @@ def test_LightSwitch_timeout():
     lock = Lock()
     ls = LightSwitch(lock)
     lock.acquire()
-    assert False == ls.acquire(timeout=SLEEP_TIME)
-    assert False == ls.acquire(timeout=0)
+    assert(ls.acquire(timeout=SLEEP_TIME) is False)
+    assert(ls.acquire(timeout=0) is False)
 
 
 def test_bathroom_example():

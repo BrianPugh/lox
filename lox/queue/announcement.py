@@ -150,7 +150,7 @@ class Announcement:
         with new_ann.lock:
             new_ann.subscribers = ann.subscribers
             new_ann.maxsize = ann.maxsize
-            new_ann.q = queue.Queue(maxsize=self.maxsize) if q is None else q
+            new_ann.q = queue.Queue(maxsize=ann.maxsize) if q is None else q
             new_ann.backlog_use = ann.backlog_use
             new_ann.backlog = ann.backlog
         return new_ann

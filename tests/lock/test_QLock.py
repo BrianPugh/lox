@@ -32,8 +32,8 @@ def test_1():
 
 def test_timeout():
     qlock = QLock()
-    assert qlock.acquire()
-    assert False == qlock.acquire(timeout=SLEEP_TIME)
+    assert(qlock.acquire())
+    assert(qlock.acquire(timeout=SLEEP_TIME) is False)
 
 
 def test_perf_qlock(benchmark):

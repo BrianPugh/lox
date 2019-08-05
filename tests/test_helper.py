@@ -34,12 +34,12 @@ class Class1:
     @lox.thread(2)
     def test_method1(self, x, y):
         sleep(SLEEP_TIME)
-        return x*y + self.z
+        return x * y + self.z
 
     @lox.thread
     def test_method2(self, x, y):
         sleep(SLEEP_TIME)
-        return x*y - self.z
+        return x * y - self.z
 
 
 def test_MethodDecoratorAdaptor_gc():

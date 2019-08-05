@@ -35,7 +35,7 @@ def read_worker():
     global rw_lock, resp
     with rw_lock('r'):
         local_copy = copy(resource)
-        sleep(SLEEP_TIME)  # to make sure that all workers are truley accessing the resource at the same time
+        sleep(SLEEP_TIME)
 
     resp.append(local_copy)
     return
@@ -105,15 +105,15 @@ def test_RWLock_rw():
 def test_RWLock_timeout():
     lock = RWLock()
 
-    assert True == lock.acquire('r', timeout=0.01)
-    assert False == lock.acquire('w', timeout=0.01)
-    assert True == lock.acquire('r', timeout=0.01)
+    assert(lock.acquire('r', timeout=0.01) is True)
+    assert(lock.acquire('w', timeout=0.01) is False)
+    assert(lock.acquire('r', timeout=0.01) is True)
     lock.release('r')
     lock.release('r')
 
-    assert True == lock.acquire('w', timeout=0.01)
-    assert False == lock.acquire('w', timeout=0.01)
-    assert False == lock.acquire('r', timeout=0.01)
+    assert(lock.acquire('w', timeout=0.01) is True)
+    assert(lock.acquire('w', timeout=0.01) is False)
+    assert(lock.acquire('r', timeout=0.01) is False)
     lock.release('w')
 
 
@@ -196,7 +196,8 @@ def bathroom_example():
     # While the Janitor is waiting, he doesn't let anyone else into the room.
     # After Person 0, leaves the room, the Janitor enters.
     # After cleaning, the Janitor leaves at the 2.000 second mark.
-    # Ever since the janitor was waiting (at 0.500 s), Person 1, Person 2, Person 3, and Person 4 have been lining up to enter.
+    # Ever since the janitor was waiting (at 0.500 s), Person 1, Person 2,
+    # Person 3, and Person 4 have been lining up to enter.
     # Now that the Janitor left the restroom, all the waiting people go in at the same time.
     return res
 

@@ -174,7 +174,7 @@ class Funnel:
         if self.index < 0:
             raise FunnelPutTopError
 
-        if self.lock.acquire(blocking=blocking, timeout=timeout) == False:
+        if not self.lock.acquire(blocking=blocking, timeout=timeout):
             return False
 
         # put Item into dict's key's deque

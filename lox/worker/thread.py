@@ -100,11 +100,15 @@ class _ThreadWorker(threading.Thread):
             try:
                 job = self.job_queue.get(timeout=0)
                 try:
-                    log.debug("Executing decorated function %s with pre_args %s, args %s, post_args %s, and kwargs %s"
-                              % (str(job.func), str(job.pre_args), str(job.args), str(job.post_args), str(job.kwargs)))
+                    log.debug("Executing decorated function %s with pre_args %s, "
+                              "args %s, post_args %s, and kwargs %s" % (
+                                  str(job.func), str(job.pre_args),
+                                  str(job.args), str(job.post_args),
+                                  str(job.kwargs)
+                              ))
                     self.res[job.index] = job.func(
                         *job.pre_args, *job.args, *job.post_args, **job.kwargs)
-                except Exception as e:
+                except Exception:
                     with term_colors("red"):
                         print(traceback.format_exc())
                 finally:
@@ -296,7 +300,10 @@ class _ThreadWrapper(WorkerWrapper):
                 if isinstance(arg, ScatterPromise):
                     if prev_promise:
                         raise ValueError(
-                            "There can only be one promise. If your input takes more than one promise, you should probably be calling \"gather()\"")
+                            "There can only be one promise. "
+                            "If your input takes more than one promise, "
+                            "you should probably be calling \"gather()\""
+                        )
                     else:
                         prev_promise = arg
                     continue
