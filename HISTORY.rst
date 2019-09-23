@@ -2,6 +2,11 @@
 History
 =======
 
+0.6.2 (2019-07-21)
+------------------
+* Update dependencies
+* Fix garbage-collecting exclusiviity
+
 0.6.1 (2019-07-21)
 ------------------
 * Fix memory leak in ``lox.process``.

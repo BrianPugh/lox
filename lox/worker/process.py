@@ -71,7 +71,7 @@ class _ProcessWrapper(WorkerWrapper):
             Index into solution list.
         """
         if self.pool is None:
-            self.pool = mp.Pool(self.n_workers,)
+            self.pool = mp.get_context("spawn").Pool(self.n_workers,)
         self.response.append(self.pool.apply_async(self.func, args=args, kwds=kwargs))
         return len(self.response)-1
 
