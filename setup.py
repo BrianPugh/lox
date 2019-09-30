@@ -8,7 +8,7 @@ import sys
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 
-version='0.6.2'
+version='0.6.3'
 
 
 class VerifyVersionCommand(install):
