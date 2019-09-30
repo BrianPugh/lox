@@ -5,7 +5,6 @@
 
 import sys
 import gc
-from threading import Lock
 
 
 __all__ = ["auto_adapt_to_methods", "MethodDecoratorAdaptor", "term_colors", ]
@@ -13,20 +12,18 @@ __all__ = ["auto_adapt_to_methods", "MethodDecoratorAdaptor", "term_colors", ]
 cdf = {}  # cached (decorator, func)
 cdfi = {}  # cached (instance, owner, decorator, func)
 
-cdf_lock = Lock(); 
-cdfi_lock = Lock(); 
-
 
 def cdfi_gc_cb(phase, info):
     """ Garbage Collector callback to free deleted cdfi entries"""
 
     global cdfi
     if phase == "start":
-        with cdfi_lock:
+        try:
             remove = [k for k, v in cdfi.items() if sys.getrefcount(v.func.__self__) <= 3]
             for k in remove:
                 del cdfi[k]
-
+        except RuntimeError:
+            pass
 
 gc.callbacks.append(cdfi_gc_cb)
 
@@ -52,9 +49,8 @@ class MethodDecoratorAdaptor:
     def __get__(self, instance, owner):
         global cdfi
         k = (instance, owner, self.decorator, self.func)
-        with cdfi_lock:
-            if k not in cdfi:
-                cdfi[k] = self.decorator(self.func.__get__(instance, owner))
+        if k not in cdfi:
+            cdfi[k] = self.decorator(self.func.__get__(instance, owner))
         return cdfi[k]
 
     def __getattr__(self, attr):
@@ -66,9 +62,8 @@ class MethodDecoratorAdaptor:
     def _get_cdf(self):
         global cdf
         k = (self.decorator, self.func)
-        with cdf_lock:
-            if k not in cdf:
-                cdf[k] = self.decorator(self.func)
+        if k not in cdf:
+            cdf[k] = self.decorator(self.func)
         return cdf[k]
 
 
