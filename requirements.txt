@@ -1,2 +1,2 @@
-pathos==0.2.5
+pathos==0.2.6
 sphinx_rtd_theme==0.4.3
