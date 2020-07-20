@@ -6,7 +6,7 @@ from ..exceptions import Timeout
 from threading import Lock
 import pathos.multiprocessing as mp
 
-__all__ = ["WorkerWrapper", "ScatterPromise"]
+__all__ = ["WorkerWrapper",]
 
 
 class WorkerWrapper(ABC):
@@ -82,24 +82,3 @@ class WorkerWrapper(ABC):
         """
         return
 
-
-class ScatterPromise(int):
-    """ Represents: index into solution array.
-    Also provides the functionality to chain scatter calls.
-    """
-
-    def __new__(cls, val, dec):
-        """
-        Parameters
-        ----------
-        val : int
-            Index of result into solution array.
-        dec : decorator object
-            Decorator object.
-        """
-
-        if val < 0:
-            raise ValueError("Value must be a non-negative index")
-        new_obj = super(cls, cls).__new__(cls, val)
-        new_obj.dec = dec  # Decorator object
-        return new_obj

@@ -56,6 +56,9 @@ lint: ## check style with flake8
 test: ## run tests quickly with the default Python
 	py.test
 
+test-thread:
+	python3 -m pytest tests/worker/test_thread.py --pdb -s
+
 test-all: ## run tests on every Python version with tox
 	tox
 
