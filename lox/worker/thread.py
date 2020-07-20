@@ -25,19 +25,9 @@ Example:
 """
 
 from collections import namedtuple, deque
-from threading import Lock, BoundedSemaphore
-from time import time, sleep
 import concurrent.futures
 import functools
-import logging as log
-import queue
-import sys
 import threading
-import traceback
-from ..lock import LightSwitch
-from ..helper import auto_adapt_to_methods, MethodDecoratorAdaptor, term_colors
-from ..queue import Announcement
-#from .worker import WorkerWrapper, ScatterPromise
 
 __all__ = ["thread", ]
 
