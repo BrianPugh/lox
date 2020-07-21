@@ -10,15 +10,15 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - test-python-install:
+      - test-python-install-3.5:
           version: "3.5"
           requires:
             - build
-      - test-python-install:
+      - test-python-install-3.6:
           version: "3.6"
           requires:
             - build
-      - test-python-install:
+      - test-python-install-3.7:
           version: "3.7"
           requires:
             - build
