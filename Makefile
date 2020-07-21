@@ -59,6 +59,9 @@ test: ## run tests quickly with the default Python
 test-thread:
 	python3 -m pytest tests/worker/test_thread.py --pdb -s
 
+test-process:
+	python3 -m pytest tests/worker/test_thread.py --pdb -s
+
 test-all: ## run tests on every Python version with tox
 	tox
 

@@ -15,19 +15,20 @@ def test_basic_args():
         return x * y
 
     # Vanilla function execution still works
-    assert(10 == worker_task(2, 5))
+    assert 10 == worker_task(2, 5)
 
-    assert(len(worker_task) == 0)
+    assert len(worker_task) == 0
     print("test_process: %s" % (worker_task))
 
-    for x, y in zip(in_x, in_y):
-        worker_task.scatter(x, y)
+    for i in range(2):
+        for x, y in zip(in_x, in_y):
+            worker_task.scatter(x, y)
 
-    res = worker_task.gather()
-    assert(len(res) == len(in_x))
+        res = worker_task.gather()
+        assert len(res) == len(in_x)
 
-    for r, x, y in zip(res, in_x, in_y):
-        assert((x*y) == r)
+        for r, x, y in zip(res, in_x, in_y):
+            assert (x*y) == r
 
 
 def test_basic_noargs():
@@ -40,19 +41,20 @@ def test_basic_noargs():
         return x * y
 
     # Vanilla function execution still works
-    assert(10 == worker_task(2, 5))
+    assert 10 == worker_task(2, 5)
 
-    assert(len(worker_task) == 0)
+    assert len(worker_task) == 0
     print("test_process: %s" % (worker_task))
 
-    for x, y in zip(in_x, in_y):
-        worker_task.scatter(x, y)
+    for i in range(2):
+        for x, y in zip(in_x, in_y):
+            worker_task.scatter(x, y)
 
-    res = worker_task.gather()
-    assert(len(res) == len(in_x))
+        res = worker_task.gather()
+        assert len(res) == len(in_x)
 
-    for r, x, y in zip(res, in_x, in_y):
-        assert((x*y) == r)
+        for r, x, y in zip(res, in_x, in_y):
+            assert (x*y) == r
 
 
 class Class1:
@@ -78,21 +80,22 @@ def test_method_1():
 
     test_obj = Class1(z)
 
-    assert((2*5+z) == test_obj.test_method1(2, 5))
-    assert((2*5+z) == test_obj.test_method2(2, 5))
+    assert (2*5+z) == test_obj.test_method1(2, 5)
+    assert (2*5+z) == test_obj.test_method2(2, 5)
 
-    for x, y in zip(in_x, in_y):
-        test_obj.test_method1.scatter(x, y)
-    res = test_obj.test_method1.gather()
-    assert(len(res) == len(in_x))
+    for i in range(2):
+        for x, y in zip(in_x, in_y):
+            test_obj.test_method1.scatter(x, y)
+        res = test_obj.test_method1.gather()
+        assert len(res) == len(in_x), f"iteration {i}"
 
-    for r, x, y in zip(res, in_x, in_y):
-        assert((x*y+z) == r)
+        for r, x, y in zip(res, in_x, in_y):
+            assert (x*y+z) == r
 
-    for x, y in zip(in_x, in_y):
-        test_obj.test_method2.scatter(x, y)
-    res = test_obj.test_method2.gather()
-    assert(len(res) == len(in_x))
+        for x, y in zip(in_x, in_y):
+            test_obj.test_method2.scatter(x, y)
+        res = test_obj.test_method2.gather()
+        assert len(res) == len(in_x), f"iteration {i}"
 
-    for r, x, y in zip(res, in_x, in_y):
-        assert((x*y+z) == r)
+        for r, x, y in zip(res, in_x, in_y):
+            assert (x*y+z) == r

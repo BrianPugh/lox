@@ -26,72 +26,107 @@ Example:
 """
 
 
+import concurrent.futures
 from collections import deque
 import pathos.multiprocessing as mp
 import logging as log
-import sys
-from .worker import WorkerWrapper
-from ..helper import auto_adapt_to_methods, MethodDecoratorAdaptor
+import os
 
 __all__ = ['process', ]
 
 
-class _ProcessWrapper(WorkerWrapper):
-    """Process helper decorator.
-    """
+class ScatterGatherCallable:
+    def __init__(self, fn, instance, executor, pending, n_workers):
+        self._fn = fn
+        self._instance = instance
+        self._executor = executor
+        self._pending = pending
+        self._n_workers = n_workers
 
-    def __init__(self, func, n_workers=None):
-        if n_workers is None:
-            n_workers = mp.cpu_count()
-        super().__init__(n_workers, func)
-        self.pool = None
+    def __call__(self, *args, **kwargs):
+        if self._instance is not None:
+            args = (self._instance,) + args
+        return self._fn(*args, **kwargs)
+
+    def scatter(self, *args, **kwargs):
+        if self._instance is not None:
+            args = (self._instance,) + args
+
+        if self._executor[0] is None:
+            # We create the pool here for greater serialization compatability
+            self._executor[0] = mp.Pool(self._n_workers)
+
+        fut = self._executor[0].apply_async(self._fn, args=args, kwds=kwargs)
+        self._pending.append(fut)
+
+        return fut
+
+    def gather(self):
+        self._executor[0].close()
+        self._executor[0].join()
+        fetched = [x.get() for x in self._pending]
+        self._pending.clear()
+        self._executor[0] = None
+        return fetched
+
+
+class ScatterGatherDescriptor:
+    def __init__(self, fn, n_workers):
+        self._executor = [None]  # Make a list to share a "pointer"
+        self._n_workers = n_workers
+        self._fn = fn
+        self._pending = deque()
+        self._base_callable = ScatterGatherCallable(self._fn, None, self._executor, self._pending, self._n_workers)
+
+    def __call__(self, *args, **kwargs):
+        """
+        Vanilla passthrough function execution. Default user function behavior.
+
+        Returns
+        -------
+        Decorated function return type.
+           Return of decorated function.
+        """
+
+        return self._fn(*args, **kwargs)
 
     def __len__(self):
         """ 
         Returns
         -------
-        int
-            Number of jobs not yet completed.
+            Approximate length of unprocessed job queue.
         """
 
         count = 0
-        for res in self.response:
+        for res in self._pending:
             if not res.ready():
                 count += 1
 
         return count
 
+    def __get__(self, instance, owner=None):
+        if instance is None:
+            return self
+        return ScatterGatherCallable(self._fn, instance, self._executor, self._pending, self._n_workers)
+
     def scatter(self, *args, **kwargs):
         """Enqueue a job to be processed by workers.
         Spin up workers if necessary.
 
-        Returns
-        -------
-        int
-            Index into solution list.
+        Return
+        ------
+        concurrent.futures.Future
         """
-        if self.pool is None:
-            self.pool = mp.Pool(self.n_workers,)
-        self.response.append(self.pool.apply_async(self.func, args=args, kwds=kwargs))
-        return len(self.response)-1
+
+        return self._base_callable.scatter(*args, **kwargs)
 
     def gather(self):
-        """ Gather results. Blocks until job_queue is empty.
-        Also blocks scatter on other processes.
-
-        Returns
-        -------
-        list
-            Results in order scatter'd
+        """ Block and collect results from prior ``scatter`` calls.
         """
 
-        self.pool.close()
-        self.pool.join()
-        del self.pool
-        fetched = [x.get() for x in self.response]
-        self.response = deque()
-        self.pool = None
-        return fetched
+        results = self._base_callable.gather()
+        self._executor = None
+        return results
 
 
 def process(n_workers):
@@ -155,19 +190,17 @@ def process(n_workers):
             Results in the order that scatter was invoked.
     """
 
-    @auto_adapt_to_methods
-    def wrapper(func):
-        return _ProcessWrapper(func, n_workers=n_workers)
+    # Support @process with no arguments.
+    if callable(n_workers):
+        return process(os.cpu_count())(n_workers)
 
-    if isinstance(n_workers, int):
-        # assume this is being called from decorator like "lox.process(5)"
-        return wrapper
-    else:
-        # assume decorator with called as "lox.process"
-        func = n_workers
-        return MethodDecoratorAdaptor(_ProcessWrapper, func)
+    def decorator(fn):
+        return ScatterGatherDescriptor(fn, n_workers)
+
+    return decorator
 
 
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
+

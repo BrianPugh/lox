@@ -59,12 +59,17 @@ class ScatterGatherCallable:
             self._pending[:] = []
         return [fut.result() for fut in pending]
 
+
 class ScatterGatherDescriptor:
-    def __init__(self, fn, worker_n):
-        self._fn = fn
-        self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=worker_n)
-        self._pending = []
+    def __init__(self, fn, n_workers):
+        """
+        Note: define self._executor in child class before calling this
+        """
+
+        self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=n_workers)
         self._pending_lock = threading.Lock()
+        self._fn = fn
+        self._pending = []
         self._base_callable = ScatterGatherCallable(self._fn, None, self._executor, self._pending, self._pending_lock)
 
     def __call__(self, *args, **kwargs):
@@ -79,11 +84,6 @@ class ScatterGatherDescriptor:
 
         return self._fn(*args, **kwargs)
 
-    def __get__(self, instance, owner=None):
-        if instance is None:
-            return self
-        return ScatterGatherCallable(self._fn, instance, self._executor, self._pending, self._pending_lock)
-
     def __len__(self):
         """ 
         Returns
@@ -92,6 +92,11 @@ class ScatterGatherDescriptor:
         """
 
         return self._executor._work_queue.qsize()
+
+    def __get__(self, instance, owner=None):
+        if instance is None:
+            return self
+        return ScatterGatherCallable(self._fn, instance, self._executor, self._pending, self._pending_lock)
 
     def scatter(self, *args, **kwargs):
         """Enqueue a job to be processed by workers.
@@ -110,7 +115,8 @@ class ScatterGatherDescriptor:
 
         return self._base_callable.gather()
 
-def thread(worker_n):
+
+def thread(n_workers):
     """ Decorator to execute a function in multiple threads.
 
     Example:
@@ -186,11 +192,11 @@ def thread(worker_n):
     """
 
     # Support @thread with no arguments.
-    if callable(worker_n):
-        return thread(50)(worker_n)
+    if callable(n_workers):
+        return thread(50)(n_workers)
 
     def decorator(fn):
-        return ScatterGatherDescriptor(fn, worker_n)
+        return ScatterGatherDescriptor(fn, n_workers)
 
     return decorator
 
