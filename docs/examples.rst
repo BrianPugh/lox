@@ -56,42 +56,6 @@ With minimal modifications, we now have a multithreaded application with
 significant performance improvements.
 
 
-Multithreading Chaining
------------------------
-
-Pipelining data between worker pools is another common application. Say you have
-a pool of workers fetching images from disk, and another pool of 2 workers
-processing them on 2 GPUs. 
-
-.. doctest::
-
-    >>> import lox
-    >>> import numpy as np
-    >>> from time import sleep
-    >>> 
-    >>> @lox.thread(10)
-    ... def fetch_image(name):
-    ...     # Dummy image
-    ...     sleep(1)
-    ...     return np.zeros((100,100,3), dtype=np.uint8)
-    >>> 
-    >>> @lox.thread(2)
-    ... def process_image( im )
-    ...     sleep(1) # Pretend this is an expensive operation on a GPU
-    ...     return im / 255.0
-    >>> 
-    >>> fns = ['im1.png', 'im2.png', 'im3.png', 'im4.png', 'im5.png', ]
-    >>> for fn in fns:
-    ...     im = fetch_image.scatter(fn) # Returns an index/promise of the result.
-    ...     process_image.scatter(im)
-    >>>
-    >>> list_of_processed_images = process_image.gather()
-
-``process_image.scatter(...)`` will automatically unpack the return value of 
-``fetch_image(...)`` if it's a tuple. Positional and keyword arguments can also 
-be passed into `process_image.scatter`. A current limitation is that only 1 
-or fewer promises can be fed into a scatter call.
-
 Multiprocessing
 ---------------
 
