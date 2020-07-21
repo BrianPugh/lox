@@ -21,7 +21,7 @@ Threading and multiprocessing made easy.
 
 * Free software: MIT license
 * Documentation: https://lox.readthedocs.io.
-* Python >=3.5
+* Python >=3.6
 
 
 **Lox** provides decorators and synchronization primitives to quickly add 
@@ -45,8 +45,6 @@ Todos
 -----
 
 * All objects except ``lox.process`` are for threads. These will eventually be multiprocess friendly.
-
-* Chaining of scatter calls to multiple worker pools
 
 Usage
 -----
