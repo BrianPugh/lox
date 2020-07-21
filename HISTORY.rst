@@ -2,6 +2,13 @@
 History
 =======
 
+0.7.0 (2020-07-20)
+------------------
+* Complete rework of workers
+  + Fix memory leaks
+* Drop support for python3.5
+* Drop support for chaining in favor of simpler codebase
+
 0.6.3 (2019-07-30)
 ------------------
 * Alternative fix for 0.6.2.
