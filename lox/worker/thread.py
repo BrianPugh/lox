@@ -31,6 +31,7 @@ import threading
 
 __all__ = ["thread", ]
 
+
 class ScatterGatherCallable:
     def __init__(self, fn, instance, executor, pending, pending_lock):
         self._fn = fn
@@ -70,7 +71,11 @@ class ScatterGatherDescriptor:
         self._pending_lock = threading.Lock()
         self._fn = fn
         self._pending = []
-        self._base_callable = ScatterGatherCallable(self._fn, None, self._executor, self._pending, self._pending_lock)
+        self._base_callable = ScatterGatherCallable(self._fn,
+                                                    None,
+                                                    self._executor,
+                                                    self._pending,
+                                                    self._pending_lock)
 
     def __call__(self, *args, **kwargs):
         """
@@ -96,7 +101,8 @@ class ScatterGatherDescriptor:
     def __get__(self, instance, owner=None):
         if instance is None:
             return self
-        return ScatterGatherCallable(self._fn, instance, self._executor, self._pending, self._pending_lock)
+        return ScatterGatherCallable(self._fn, instance, self._executor,
+                                     self._pending, self._pending_lock)
 
     def scatter(self, *args, **kwargs):
         """Enqueue a job to be processed by workers.

@@ -76,7 +76,11 @@ class ScatterGatherDescriptor:
         self._n_workers = n_workers
         self._fn = fn
         self._pending = deque()
-        self._base_callable = ScatterGatherCallable(self._fn, None, self._executor, self._pending, self._n_workers)
+        self._base_callable = ScatterGatherCallable(self._fn,
+                                                    None,
+                                                    self._executor,
+                                                    self._pending,
+                                                    self._n_workers)
 
     def __call__(self, *args, **kwargs):
         """
@@ -107,7 +111,8 @@ class ScatterGatherDescriptor:
     def __get__(self, instance, owner=None):
         if instance is None:
             return self
-        return ScatterGatherCallable(self._fn, instance, self._executor, self._pending, self._n_workers)
+        return ScatterGatherCallable(self._fn, instance, self._executor,
+                                     self._pending, self._n_workers)
 
     def scatter(self, *args, **kwargs):
         """Enqueue a job to be processed by workers.
@@ -203,4 +208,3 @@ def process(n_workers):
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
-

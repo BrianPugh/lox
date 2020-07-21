@@ -19,5 +19,3 @@ def test_ctx(capsys):
             print("test bold")
         with term_colors("header"):
             print("test header")
-
-

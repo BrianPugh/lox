@@ -114,4 +114,3 @@ def test_method_1():
     assert(len(res) == len(in_x))
     for r, x, y in zip(res, in_x, in_y):
         assert((x*y-z2) == r)
-
