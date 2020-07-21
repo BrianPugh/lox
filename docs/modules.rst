@@ -1,56 +1,7 @@
-=======
-Modules
-=======
+lox
+===
 
-Worker
-------
-.. automodule:: lox.worker 
+.. toctree::
+   :maxdepth: 4
 
-Thread
-^^^^^^
-
-.. autofunction:: lox.worker.thread
-
-Process
-^^^^^^^
-
-.. autofunction:: lox.worker.process
-
-Lock
-----
-.. automodule:: lox.lock
-   :members:
-
-LightSwitch
-^^^^^^^^^^^
-.. autoclass:: lox.lock.LightSwitch
-   :members:
-
-RWLock
-^^^^^^
-.. autoclass:: lox.lock.RWLock
-   :members:
-
-QLock
-^^^^^
-.. autoclass:: lox.lock.QLock
-   :members:
-
-IndexSemaphore
-^^^^^^^^^^^^^^
-.. autoclass:: lox.lock.IndexSemaphore
-   :members:
-
-Queue
------
-
-Announcement
-^^^^^^^^^^^^
-.. autoclass:: lox.queue.Announcement
-   :members:
-
-Funnel
-^^^^^^
-.. autoclass:: lox.queue.Funnel
-   :members:
-
+   lox
