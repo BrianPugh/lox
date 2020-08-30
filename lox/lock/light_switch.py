@@ -23,15 +23,6 @@ class LightSwitch:
     room in the physical world. The first person to enter the room turns
     on the lights; then, when everyone is leaving, the last person to exit
     turns the lights off.
-
-    Attributes
-    ----------
-    lock : threading.Lock
-        The lock provided to the constructor that may be acquired/released
-        by ``LightSwitch``.
-
-    counter: int
-        Number of times the ``LightSwitch`` has been acquired without release.
     """
 
     def __init__(self, lock, multiprocessing=False):
@@ -55,6 +46,10 @@ class LightSwitch:
 
     @property
     def lock(self):
+        """threading.Lock: The lock provided to the constructor that may be
+        acquired/released by ``LightSwitch``.
+        """
+
         return self._lock
 
     @lock.setter
@@ -63,6 +58,9 @@ class LightSwitch:
 
     @property
     def counter(self):
+        """int: Number of times the ``LightSwitch`` has been acquired without release.
+        """
+
         return self._counter
 
     @counter.setter

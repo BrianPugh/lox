@@ -1,7 +1,6 @@
 """
-.. module:: announcement
-   :synopsis: Many-to-many queue recipients with backlog support for race 
-   condition subscribing or lazy subscribing.
+.. module:: Announcement
+   :synopsis: Many-to-many queue recipients with backlog support for race condition subscribing or lazy subscribing.
 """
 
 
@@ -54,11 +53,6 @@ class Announcement:
     The backlog allows future (or potentially race-condition) subscribers to 
     get content put'd before they subscribed. However, the user must be careful 
     of memory consumption.
-
-    Attributes
-    ----------
-    backlog : deque
-        Backlog of queued data. None if not used.
     """
 
     @property
@@ -72,6 +66,9 @@ class Announcement:
 
     @property
     def backlog(self,):
+        """collections.deque: Backlog of queued data. None if not used.
+        """
+
         return self._backlog
 
     @backlog.setter

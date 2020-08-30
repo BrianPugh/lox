@@ -97,8 +97,8 @@ class QLock:
     def release(self):
         """ Release exclusive access to resource.
 
-        Exception
-        ---------
+        Raises
+        ------
         ValueError
             Lock released more than it has been acquired.
         """
