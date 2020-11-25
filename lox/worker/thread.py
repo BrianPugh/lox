@@ -29,6 +29,7 @@ import concurrent.futures
 import functools
 import threading
 
+
 __all__ = ["thread", ]
 
 
@@ -53,12 +54,46 @@ class ScatterGatherCallable:
             self._pending.append(fut)
         return fut
 
-    def gather(self):
+    def gather(self, *, tqdm=None):
+        """
+        Parameters
+        ----------
+        tqdm : tqdm.tqdm or bool
+            If ``bool`` and ``True``, will internally create and update a default tqdm object.
+            If ``tqdm``, 
+            Initialized tqdm object to update with progress.
+        """
+
         pending = []
         with self._pending_lock:
             pending[:] = self._pending
             self._pending[:] = []
-        return [fut.result() for fut in pending]
+
+        if tqdm is not None:
+            from tqdm import tqdm as TQDM  # to avoid argument namespace collisions.
+
+            if isinstance(tqdm, bool) and tqdm:
+                tqdm = TQDM(total=len(pending))
+
+            if isinstance(tqdm, TQDM):
+                pass
+            else:
+                raise ValueError(f"Don't know how to handle tqdm type \"{type(tqdm)}\"")
+
+            # We need a mutex for the tqdm object since multiple callbacks
+            # can be called at the same time via different threads under 
+            # the same parent process.
+            tqdm_mutex = threading.Lock()
+
+            def tqdm_callback(fut):
+                with tqdm_mutex:
+                    tqdm.update(1)
+
+            [fut.add_done_callback(tqdm_callback) for fut in pending]
+
+        output = [fut.result() for fut in pending]
+
+        return output
 
 
 class ScatterGatherDescriptor:
@@ -115,11 +150,11 @@ class ScatterGatherDescriptor:
 
         return self._base_callable.scatter(*args, **kwargs)
 
-    def gather(self):
+    def gather(self, *args, **kwargs):
         """ Block and collect results from prior ``scatter`` calls.
         """
 
-        return self._base_callable.gather()
+        return self._base_callable.gather(*args, **kwargs)
 
 
 def thread(n_workers):
