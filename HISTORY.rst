@@ -5,9 +5,12 @@ History
 0.8.0 (2020-11-25)
 ------------------
 * ``tqdm`` support on ``lox.thread.gather``
-  * Can be a bool:
+  * Can be a bool::
+
         >>> my_func.gather(tqdm=True)
-  * Can be a ``tqdm`` object:
+
+  * Can be a ``tqdm`` object::
+
         >>> from tqdm import tqdm
         >>> pbar = tqdm(total=100)
         >>> for _ in range(100):
