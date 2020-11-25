@@ -1,3 +1,4 @@
+import pytest
 import threading
 import lox
 from time import sleep, time
@@ -115,6 +116,7 @@ def test_method_1():
     for r, x, y in zip(res, in_x, in_y):
         assert((x*y-z2) == r)
 
+@pytest.mark.visual
 def test_tqdm(mocker):
     from tqdm import tqdm
     pass
