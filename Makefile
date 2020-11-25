@@ -54,7 +54,7 @@ lint: ## check style with flake8
 	flake8 lox tests
 
 test: ## run tests quickly with the default Python
-	py.test
+	python3 -m pytest
 
 test-thread:
 	python3 -m pytest tests/worker/test_thread.py --pdb -s
