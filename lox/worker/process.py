@@ -29,8 +29,15 @@ Example:
 import concurrent.futures
 from collections import deque
 import pathos.multiprocessing as mp
+import threading
 import logging as log
 import os
+
+try:
+    from tqdm import tqdm as TQDM  # to avoid argument namespace collisions.
+except ModuleNotFoundError:
+    TQDM = None
+
 
 __all__ = ['process', ]
 
@@ -42,6 +49,9 @@ class ScatterGatherCallable:
         self._executor = executor
         self._pending = pending
         self._n_workers = n_workers
+        self._results_thread_lock = threading.Lock()
+        self._tqdm = None
+        self._tqdm_pre_update = 0  # Stores updates before we have a tqdm object.
 
     def __call__(self, *args, **kwargs):
         if self._instance is not None:
@@ -56,12 +66,32 @@ class ScatterGatherCallable:
             # We create the pool here for greater serialization compatability
             self._executor[0] = mp.Pool(self._n_workers)
 
-        fut = self._executor[0].apply_async(self._fn, args=args, kwds=kwargs)
+        def callback(res):
+            # All of these are executed in a single "results" thread
+            with self._results_thread_lock:
+                if self._tqdm is not None:
+                    self._tqdm.update(1)
+                else:
+                    self._tqdm_pre_update += 1
+        fut = self._executor[0].apply_async(self._fn, args=args, kwds=kwargs, callback=callback)
         self._pending.append(fut)
 
         return fut
 
-    def gather(self):
+    def gather(self, *, tqdm=None):
+        if tqdm is not None:
+            if TQDM is None:
+                raise ModuleNotFoundError("No module named 'tqdm'")
+
+            if isinstance(tqdm, bool) and tqdm:
+                tqdm = TQDM(total=len(self._pending))
+
+            with self._results_thread_lock:
+                self._tqdm = tqdm
+                # Update the progressbar with all of the results from before
+                # the TQDM object was declared.
+                self._tqdm.update(self._tqdm_pre_update)
+
         self._executor[0].close()
         self._executor[0].join()
         fetched = [x.get() for x in self._pending]
@@ -125,11 +155,11 @@ class ScatterGatherDescriptor:
 
         return self._base_callable.scatter(*args, **kwargs)
 
-    def gather(self):
+    def gather(self, *args, **kwargs):
         """ Block and collect results from prior ``scatter`` calls.
         """
 
-        results = self._base_callable.gather()
+        results = self._base_callable.gather(*args, **kwargs)
         self._executor = None
         return results
 

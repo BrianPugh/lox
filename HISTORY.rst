@@ -2,6 +2,10 @@
 History
 =======
 
+0.9.0 (2020-11-25)
+------------------
+* ``tqdm`` support on ``lox.process.gather``. See v0.8.0 release notes for usage.
+
 0.8.0 (2020-11-25)
 ------------------
 * ``tqdm`` support on ``lox.thread.gather``

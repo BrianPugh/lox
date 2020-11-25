@@ -1,5 +1,8 @@
+import pytest
 import lox
 from time import sleep, time
+from random import random
+from tqdm import tqdm
 
 SLEEP_TIME = 0.01
 N_WORKERS = 2
@@ -99,3 +102,78 @@ def test_method_1():
 
         for r, x, y in zip(res, in_x, in_y):
             assert (x*y+z) == r
+
+
+@pytest.fixture
+def mock_tqdm(mocker):
+    return mocker.patch('lox.worker.process.TQDM')
+
+
+def test_tqdm_bool(mock_tqdm):
+
+    in_x = [1,   2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, ]
+    in_y = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, ]
+
+    @lox.process(N_WORKERS)  # specifying maximum number of processes
+    def worker_task(x, y):
+        sleep(random())
+        return x * y
+
+    for x, y in zip(in_x, in_y):
+        worker_task.scatter(x, y)
+    res = worker_task.gather(tqdm=True)
+
+    mock_tqdm.assert_called_once_with(total=len(in_x))
+
+    assert(len(res) == len(in_x))
+
+    for r, x, y in zip(res, in_x, in_y):
+        assert((x*y) == r)
+
+
+def test_tqdm_tqdm(mocker):
+    in_x = [1,   2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, ]
+    in_y = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, ]
+
+    @lox.process(N_WORKERS)  # specifying maximum number of processes
+    def worker_task(x, y):
+        sleep(random())
+        return x * y
+
+    pbar = mocker.MagicMock()
+    for x, y in zip(in_x, in_y):
+        worker_task.scatter(x, y)
+    res = worker_task.gather(tqdm=pbar)
+
+    n_update = 0
+    for args, kwargs in pbar.update.call_args_list:
+        n_update += args[0]
+    assert n_update == len(in_x)
+
+    assert(len(res) == len(in_x))
+
+    for r, x, y in zip(res, in_x, in_y):
+        assert((x*y) == r)
+
+
+@pytest.mark.visual
+def test_tqdm_bool_visual():
+    """ Primarily for visually asserting our tqdm mocks are correct.
+    """
+
+    in_x = [1,   2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, ]
+    in_y = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, ]
+
+    @lox.process(N_WORKERS)  # specifying maximum number of processes
+    def worker_task(x, y):
+        sleep(random())
+        return x * y
+
+    for x, y in zip(in_x, in_y):
+        worker_task.scatter(x, y)
+    res = worker_task.gather(tqdm=True)
+
+    assert(len(res) == len(in_x))
+
+    for r, x, y in zip(res, in_x, in_y):
+        assert((x*y) == r)
