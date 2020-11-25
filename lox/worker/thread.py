@@ -29,6 +29,11 @@ import concurrent.futures
 import functools
 import threading
 
+try:
+    from tqdm import tqdm as TQDM  # to avoid argument namespace collisions.
+except ModuleNotFoundError:
+    TQDM = None
+
 
 __all__ = ["thread", ]
 
@@ -70,15 +75,11 @@ class ScatterGatherCallable:
             self._pending[:] = []
 
         if tqdm is not None:
-            from tqdm import tqdm as TQDM  # to avoid argument namespace collisions.
+            if TQDM is None:
+                raise ModuleNotFoundError("No module named 'tqdm'")
 
             if isinstance(tqdm, bool) and tqdm:
                 tqdm = TQDM(total=len(pending))
-
-            if isinstance(tqdm, TQDM):
-                pass
-            else:
-                raise ValueError(f"Don't know how to handle tqdm type \"{type(tqdm)}\"")
 
             # We need a mutex for the tqdm object since multiple callbacks
             # can be called at the same time via different threads under 

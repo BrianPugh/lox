@@ -3,6 +3,7 @@
 
 import pytest
 
+
 def pytest_addoption(parser):
     parser.addoption(
         "--visual",
@@ -10,6 +11,7 @@ def pytest_addoption(parser):
         default=False,
         help="run interactive visual tests",
     )
+
 
 def pytest_collection_modifyitems(config, items):
     if config.getoption("--visual"):
