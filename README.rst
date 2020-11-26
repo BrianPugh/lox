@@ -67,6 +67,7 @@ Easy Multithreading
     >>> print(results) # Results are in the same order as scatter() calls
     [0, 2, 6, 12, 20]
 
+
 Easy Multiprocessing
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -84,4 +85,22 @@ Easy Multiprocessing
     >>> results = foo.gather() # block until results are ready
     >>> print(results) # Results are in the same order as scatter() calls
     [0, 2, 6, 12, 20]
+
+
+Progress Bar Support (tqdm)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    >>> import lox
+    >>> from random import random
+    >>> from time import sleep
+    >>>
+    >>> @lox.thread(2)
+    ... def foo(multiplier):
+    ...     sleep(multiplier * random())
+    >>> for i in range(10):
+    >>>     foo.scatter(i)
+    >>> results = foo.gather(tqdm=True)
+    90%|████████████████████████████████▌        | 9/10 [00:03<00:00,  1.32it/s]
+    100%|███████████████████████████████████████| 10/10 [00:06<00:00,  1.46s/it]
+
 
