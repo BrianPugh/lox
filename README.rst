@@ -67,6 +67,28 @@ Easy Multithreading
     >>> print(results) # Results are in the same order as scatter() calls
     [0, 2, 6, 12, 20]
 
+Or, for example, if you aren't allowed to directly decorate the function you
+would like multithreaded/multiprocessed, you can just directly invoke the
+decorator::
+
+    >>> # Lets say we don't have direct access to this function
+    ... def foo(x,y):
+    ...     return x*y
+    >>>
+    >>> def my_func():
+    ...     foo_threaded = lox.thread(foo)
+    ...     for i in range(5):
+    ...         foo.scatter(i, i+1)
+    ...     results = foo.gather()
+    ...     # foo is currently being executed in default 50 thread executor pool
+    ...     return results
+
+This also makes it easier to dynamically control the number of 
+thread/processes in the executor pool. The syntax is a little weird, but
+this is just explicitly invoking a decorator that has optional arguments::
+    >>> # Set the number of executer threads to 10
+    >>> foo_threaded = lox.thread(10)(foo)
+
 
 Easy Multiprocessing
 ^^^^^^^^^^^^^^^^^^^^
