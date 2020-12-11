@@ -78,8 +78,8 @@ decorator::
     >>> def my_func():
     ...     foo_threaded = lox.thread(foo)
     ...     for i in range(5):
-    ...         foo.scatter(i, i+1)
-    ...     results = foo.gather()
+    ...         foo_threaded.scatter(i, i+1)
+    ...     results = foo_threaded.gather()
     ...     # foo is currently being executed in default 50 thread executor pool
     ...     return results
 
