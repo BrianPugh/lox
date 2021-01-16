@@ -13,7 +13,7 @@ except ImportError:
 
 _pdb_lock = threading.Lock()
 
-class LoxPdb(pdb.Pdb):
+class _Pdb(pdb.Pdb):
     def preloop(self):
         _pdb_lock.acquire()
         return super().preloop()
@@ -23,7 +23,7 @@ class LoxPdb(pdb.Pdb):
         return super().postloop()
 
 def set_trace(*, header=None):
-    debugger = LoxPdb()
+    debugger = _Pdb()
     if header is not None:
         debugger.message(header)
     # maybe take lock here?
