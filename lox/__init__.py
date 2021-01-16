@@ -12,7 +12,9 @@ from .lock import *
 from .queue import *
 from .worker import *
 from .exceptions import *
-from .pdb import *
+
+import lox.pdb
+from .pdb import set_trace
 
 from lox.worker.thread import thread
 from lox.worker.process import process
