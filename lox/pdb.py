@@ -26,5 +26,4 @@ def set_trace(*, header=None):
     debugger = _Pdb()
     if header is not None:
         debugger.message(header)
-    # maybe take lock here?
     debugger.set_trace(sys._getframe().f_back)
