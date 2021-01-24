@@ -1,6 +1,12 @@
 import pytest
 import lox
+try:
+    import ipdb
+except ImportError:
+    ipdb = None
 
+# Force classic pdb use
+lox.pdb.ipdb = None
 
 @pytest.fixture
 def mock_pdb_lock(mocker):
@@ -68,3 +74,6 @@ def test_pdb_set_trace_multithread_basic(mock_pdb_lock, mock_cmd_continue):
 @pytest.mark.skip(reason="Not Implemented")
 def test_pdb_set_trace_multithread_lox(mock_pdb_lock, mock_cmd_continue):
     pass
+
+
+# TODO: automatic ipdb tests
