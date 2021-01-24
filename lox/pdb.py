@@ -21,6 +21,10 @@ _in_session = False
 ###################
 
 _super_set_continue = None
+_super_set_quit = None
+_super_set_trace = None
+
+
 def _set_continue(self):
     global _in_session
     _in_session = False
@@ -30,7 +34,7 @@ def _set_continue(self):
     else:
         return super(type(self), self).set_continue()
 
-_super_set_quit = None
+
 def _set_quit(self):
     global _in_session
     _in_session = False
@@ -40,7 +44,7 @@ def _set_quit(self):
     else:
         return super(type(self), self).set_quit()
 
-_super_set_trace = None
+
 def _set_trace(self, frame=None):
     print(f"1frame: {frame}")
     global _in_session
@@ -58,11 +62,12 @@ def _set_trace(self, frame=None):
 # PDB #
 #######
 
+
 class _Pdb(pdb.Pdb):
     def __init__(self, completekey='tab', stdin=None, stdout=None, skip=None,
-                     nosigint=False, readrc=True):
+                 nosigint=False, readrc=True):
         super().__init__(completekey=completekey, stdin=stdin, stdout=stdout, skip=skip,
-                     nosigint=nosigint, readrc=readrc)
+                         nosigint=nosigint, readrc=readrc)
         self.prompt = '(LoxPdb) '
 
     set_continue = _set_continue
@@ -99,8 +104,8 @@ def _ipdb_set_trace(frame=None, context=None, cond=True):
     _super_set_trace = debugger_cls.set_trace
 
     debugger_cls.set_continue = partial(_set_continue, debugger_cls)
-    debugger_cls.set_quit     = partial(_set_quit, debugger_cls)
-    debugger_cls.set_trace    = partial(_set_trace, debugger_cls)
+    debugger_cls.set_quit = partial(_set_quit, debugger_cls)
+    debugger_cls.set_trace = partial(_set_trace, debugger_cls)
 
     p = debugger_cls.set_trace(frame=frame)
 
@@ -110,6 +115,7 @@ def _ipdb_set_trace(frame=None, context=None, cond=True):
 ##########
 # Common #
 ##########
+
 
 def set_trace(**kwargs):
     if ipdb is not None:
