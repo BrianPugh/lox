@@ -2,7 +2,7 @@ Sphinx==3.3.1
 autoflake==1.4
 autopep8==1.5.4
 bumpversion==0.6.0
-coverage==5.3
+coverage==5.4
 flake8==3.8.4
 pytest-benchmark==3.2.3
 pytest-mock==3.3.1
