@@ -94,9 +94,9 @@ install: clean ## install the package to the active Python's site-packages
 	python setup.py install
 
 dev:
-	pip3 install -r requirements_dev.txt
-	pip3 install -r requirements.txt
-	pip3 install -e .
+	python3 -m pip install -r requirements_dev.txt
+	python3 -m pip install -r requirements.txt
+	python3 -m pip install -e .
 
 package:
 	python3 setup.py sdist
