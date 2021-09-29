@@ -15,7 +15,7 @@ __all__ = ["Funnel", "FunnelPutError", "FunnelPutTopError", ]
 
 
 class FunnelPutError(Exception):
-    """ Cannot ``put`` to a top/master Funnel object;
+    """ Cannot ``put`` to a top/main Funnel object;
     can only ``put`` to subscribers.
     """
 
@@ -23,7 +23,7 @@ class FunnelPutError(Exception):
 
 
 class FunnelPutTopError(Exception):
-    """ Can only put onto subscribers, not the top/master ``Funnel``.
+    """ Can only put onto subscribers, not the top/main ``Funnel``.
     """
 
     pass
@@ -38,7 +38,7 @@ class FunnelElement:
         item
             User data
         complete : bool
-            True if item contains valid data. 
+            True if item contains valid data.
         """
 
         self.item = item
@@ -132,7 +132,7 @@ class Funnel:
         return len(self.subscribers)
 
     def subscribe(self,):
-        """ Create a new Funnel for data to be ``put`` on. 
+        """ Create a new Funnel for data to be ``put`` on.
 
         Returns
         -------
@@ -168,7 +168,7 @@ class Funnel:
         Raises
         ------
         FunnelPutTopError
-           Can only put onto subscribers, not the top/master ``Funnel``.
+           Can only put onto subscribers, not the top/main ``Funnel``.
         """
 
         if self.index < 0:
@@ -199,7 +199,7 @@ class Funnel:
         return True
 
     def get(self, block=True, timeout=None, return_jid=True):
-        """ Get from the receive queue. Will return the contents of each 
+        """ Get from the receive queue. Will return the contents of each
         input queue in the order subscribed as a tuple
 
         Parameters

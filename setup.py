@@ -32,8 +32,8 @@ class VerifyVersionCommand(install):
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 readme = readme.replace(
-        'assets/lox_200w.png', 
-        'https://raw.githubusercontent.com/BrianPugh/lox/master/assets/lox_200w.png',
+        'assets/lox_200w.png',
+        'https://raw.githubusercontent.com/BrianPugh/lox/main/assets/lox_200w.png',
         )
 
 with open('HISTORY.rst') as history_file:
