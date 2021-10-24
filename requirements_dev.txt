@@ -1,6 +1,6 @@
 Sphinx==4.0.3
 autoflake==1.4
-autopep8==1.5.7
+autopep8==1.6.0
 bumpversion==0.6.0
 coverage==6.0.2
 flake8==3.9.2
