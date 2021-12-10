@@ -19,7 +19,7 @@
 Threading and multiprocessing made easy.
 
 
-* Free software: MIT license
+* Free software: Apache-2.0 license
 * Documentation: https://lox.readthedocs.io.
 * Python >=3.6
 
