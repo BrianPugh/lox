@@ -5,12 +5,15 @@ import pytest
 
 
 def pytest_addoption(parser):
-    parser.addoption(
-        "--visual",
-        action="store_true",
-        default=False,
-        help="run interactive visual tests",
-    )
+    try:
+        parser.addoption(
+            "--visual",
+            action="store_true",
+            default=False,
+            help="run interactive visual tests",
+        )
+    except ValueError:
+        pass
 
 
 def pytest_collection_modifyitems(config, items):
