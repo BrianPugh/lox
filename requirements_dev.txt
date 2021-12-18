@@ -1,4 +1,4 @@
-Sphinx
+Sphinx==4.3.1
 autoflake
 autopep8
 bumpversion
