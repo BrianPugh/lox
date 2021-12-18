@@ -9,7 +9,7 @@ Example:
 .. doctest::
 
     >>> import lox
-    >>> 
+    >>>
     >>> @lox.thread(4) # Will operate with a maximum of 4 threads
     ... def foo(x,y):
     ...     return x*y
@@ -55,7 +55,18 @@ class ScatterGatherCallable:
         if self._instance is not None:
             args = (self._instance,) + args
         with self._pending_lock:
-            fut = self._executor.submit(self._fn, *args, **kwargs)
+            if self._executor:
+                fut = self._executor.submit(self._fn, *args, **kwargs)
+            else:
+                # Execute function in current thread
+                fut = concurrent.futures.Future()
+                fut.set_running_or_notify_cancel()
+                try:
+                    res = self._fn(*args, **kwargs)
+                except Exception as e:
+                    fut.set_exception(e)
+                else:
+                    fut.set_result(res)
             self._pending.append(fut)
         return fut
 
@@ -65,7 +76,7 @@ class ScatterGatherCallable:
         ----------
         tqdm : tqdm.tqdm or bool
             If ``bool`` and ``True``, will internally create and update a default tqdm object.
-            If ``tqdm``, 
+            If ``tqdm``,
             Initialized tqdm object to update with progress.
         """
 
@@ -82,7 +93,7 @@ class ScatterGatherCallable:
                 tqdm = TQDM(total=len(pending))
 
             # We need a mutex for the tqdm object since multiple callbacks
-            # can be called at the same time via different threads under 
+            # can be called at the same time via different threads under
             # the same parent process.
             tqdm_mutex = threading.Lock()
 
@@ -103,10 +114,17 @@ class ScatterGatherDescriptor:
         Note: define self._executor in child class before calling this
         """
 
-        self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=n_workers)
         self._pending_lock = threading.Lock()
         self._fn = fn
         self._pending = []
+
+        if n_workers:
+            self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=n_workers)
+        else:
+            # Disable threading; scatter calls are blocking; useful
+            # for debugging multithreaded functions.
+            self._executor = None
+
         self._base_callable = ScatterGatherCallable(self._fn,
                                                     None,
                                                     self._executor,
@@ -126,13 +144,16 @@ class ScatterGatherDescriptor:
         return self._fn(*args, **kwargs)
 
     def __len__(self):
-        """ 
+        """
         Returns
         -------
             Approximate length of unprocessed job queue.
         """
 
-        return self._executor._work_queue.qsize()
+        if self._executor:
+            return self._executor._work_queue.qsize()
+        else:
+            return 0
 
     def __get__(self, instance, owner=None):
         if instance is None:
@@ -166,7 +187,7 @@ def thread(n_workers):
     .. doctest::
 
         >>> import lox
-        >>> 
+        >>>
         >>> @lox.thread(4) # Will operate with a maximum of 4 threads
         ... def foo(x,y):
         ...     return x*y
@@ -192,16 +213,17 @@ def thread(n_workers):
 
         >>>  for i in range(5):
         ...    foo_res = foo.scatter(i, i+1)
-        ...    bar.scatter(foo_res, 10) # scatter will automatically unpack the results of foo 
-        >>>  
-        >>> results = bar.gather() 
+        ...    bar.scatter(foo_res, 10) # scatter will automatically unpack the results of foo
+        >>>
+        >>> results = bar.gather()
 
     Parameters
     ----------
     max_workers : int
         Maximum number of threads to invoke.
-        When ``lox.thread`` is called without ``()``, the wrapped function 
+        When ``lox.thread`` is called without ``()``, the wrapped function
         a default number of max_workers is used (50).
+        If set to 0, scatter calls will be executed in the parent thread.
 
     Methods
     -------
