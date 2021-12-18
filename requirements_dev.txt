@@ -3,7 +3,7 @@ autoflake
 autopep8
 bumpversion
 coverage
-flake8
+flake8==4.0.1
 pytest-benchmark
 pytest-mock
 pytest-runner
