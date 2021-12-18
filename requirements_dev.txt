@@ -11,5 +11,5 @@ pytest
 tox
 twine
 tqdm
-watchdog
+watchdog==2.1.6
 wheel
