@@ -1,5 +1,5 @@
 Sphinx
-autoflake
+autoflake==1.4
 autopep8
 bumpversion
 coverage
