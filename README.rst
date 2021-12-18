@@ -82,6 +82,7 @@ decorator::
 This also makes it easier to dynamically control the number of
 thread/processes in the executor pool. The syntax is a little weird, but
 this is just explicitly invoking a decorator that has optional arguments::
+
     >>> # Set the number of executer threads to 10
     >>> foo_threaded = lox.thread(10)(foo)
 
