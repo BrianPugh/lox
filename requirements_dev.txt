@@ -1,7 +1,7 @@
 Sphinx
 autoflake
 autopep8
-bumpversion
+bumpversion==0.6.0
 coverage
 flake8
 pytest-benchmark
