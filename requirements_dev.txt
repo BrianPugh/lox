@@ -12,4 +12,4 @@ tox
 twine
 tqdm
 watchdog
-wheel
+wheel==0.37.0
