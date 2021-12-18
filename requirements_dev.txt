@@ -4,7 +4,7 @@ autopep8
 bumpversion
 coverage
 flake8
-pytest-benchmark
+pytest-benchmark==3.4.1
 pytest-mock
 pytest-runner
 pytest
