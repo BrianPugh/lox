@@ -10,6 +10,6 @@ pytest-runner
 pytest
 tox
 twine
-tqdm
+tqdm==4.62.3
 watchdog
 wheel
