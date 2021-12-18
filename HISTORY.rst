@@ -2,6 +2,12 @@
 History
 =======
 
+0.10.0 (2021-12-18)
+-------------------
+* Remove dependency pinning.
+* Allow `@lox.thread(0)`. This will execute `scatter` calls in parent thread.
+  Useful for debugging breakpoints in parallelized code.
+
 0.9.0 (2020-11-25)
 ------------------
 * ``tqdm`` support on ``lox.process.gather``. See v0.8.0 release notes for usage.
@@ -45,7 +51,7 @@ History
 ------------------
 
 * ``lox.Announcement`` ``subscribe()`` calls now return another ``Announcement``
-  object that behaves like a queue instead of an actual queue. Allows for 
+  object that behaves like a queue instead of an actual queue. Allows for
   many-queue-to-many-queue communications.
 
 * New Object: ``lox.Funnel``. allows for waiting on many queues for a complete
@@ -54,12 +60,12 @@ History
 0.5.0 (2019-07-01)
 ------------------
 
-* New Object: ``lox.Announcement``. Allows a one-to-many thread queue with 
-  backlog support so that late subscribers can still get all (or most recent) 
+* New Object: ``lox.Announcement``. Allows a one-to-many thread queue with
+  backlog support so that late subscribers can still get all (or most recent)
   announcements before they subscribed.
 
 * New Feature: ``lox.thread``  ``scatter`` calls can now be chained together.
-  ``scatter`` now returns an ``int`` subclass that contains metadata to allow 
+  ``scatter`` now returns an ``int`` subclass that contains metadata to allow
   chaining. Each scatter call can have a maximum of 1 previous ``scatter`` result.
 
 * Documentation updates, theming, and logos
