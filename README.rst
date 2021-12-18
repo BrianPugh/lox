@@ -11,10 +11,6 @@
         :target: https://lox.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
-.. image:: https://pyup.io/repos/github/BrianPugh/lox/shield.svg
-        :target: https://pyup.io/repos/github/BrianPugh/lox/
-        :alt: Updates
-
 
 Threading and multiprocessing made easy.
 
@@ -24,7 +20,7 @@ Threading and multiprocessing made easy.
 * Python >=3.6
 
 
-**Lox** provides decorators and synchronization primitives to quickly add 
+**Lox** provides decorators and synchronization primitives to quickly add
 concurrency to your projects.
 
 Installation
@@ -83,7 +79,7 @@ decorator::
     ...     # foo is currently being executed in default 50 thread executor pool
     ...     return results
 
-This also makes it easier to dynamically control the number of 
+This also makes it easier to dynamically control the number of
 thread/processes in the executor pool. The syntax is a little weird, but
 this is just explicitly invoking a decorator that has optional arguments::
     >>> # Set the number of executer threads to 10
