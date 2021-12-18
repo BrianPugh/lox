@@ -5,7 +5,7 @@ bumpversion
 coverage
 flake8
 pytest-benchmark
-pytest-mock
+pytest-mock==3.6.1
 pytest-runner
 pytest
 tox
