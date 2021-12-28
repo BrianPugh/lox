@@ -65,7 +65,9 @@ Easy Multithreading
 
 Or, for example, if you aren't allowed to directly decorate the function you
 would like multithreaded/multiprocessed, you can just directly invoke the
-decorator::
+decorator:
+
+.. code-block:: python
 
     >>> # Lets say we don't have direct access to this function
     ... def foo(x,y):
@@ -79,9 +81,12 @@ decorator::
     ...     # foo is currently being executed in default 50 thread executor pool
     ...     return results
 
+
 This also makes it easier to dynamically control the number of
 thread/processes in the executor pool. The syntax is a little weird, but
-this is just explicitly invoking a decorator that has optional arguments::
+this is just explicitly invoking a decorator that has optional arguments:
+
+.. code-block:: python
 
     >>> # Set the number of executer threads to 10
     >>> foo_threaded = lox.thread(10)(foo)
@@ -89,6 +94,8 @@ this is just explicitly invoking a decorator that has optional arguments::
 
 Easy Multiprocessing
 ^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
 
     >>> import lox
     >>>
@@ -108,6 +115,8 @@ Easy Multiprocessing
 
 Progress Bar Support (tqdm)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
 
     >>> import lox
     >>> from random import random
