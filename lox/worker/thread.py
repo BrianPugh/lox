@@ -29,6 +29,8 @@ Example
 import concurrent.futures
 import threading
 
+from ..debug import LOX_DEBUG
+
 try:
     from tqdm import tqdm as TQDM  # to avoid argument namespace collisions.
 except ModuleNotFoundError:
@@ -267,7 +269,7 @@ def thread(n_workers):
         return thread(50)(n_workers)
 
     def decorator(fn):
-        return ScatterGatherDescriptor(fn, n_workers)
+        return ScatterGatherDescriptor(fn, 0 if LOX_DEBUG else n_workers)
 
     return decorator
 

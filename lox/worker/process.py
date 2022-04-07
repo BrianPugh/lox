@@ -33,6 +33,8 @@ from collections import deque
 
 import pathos.multiprocessing as mp
 
+from ..debug import LOX_DEBUG
+
 try:
     from tqdm import tqdm as TQDM  # to avoid argument namespace collisions.
 except ModuleNotFoundError:
@@ -233,7 +235,7 @@ def process(n_workers):
         return process(os.cpu_count())(n_workers)
 
     def decorator(fn):
-        return ScatterGatherDescriptor(fn, n_workers)
+        return ScatterGatherDescriptor(fn, 0 if LOX_DEBUG else n_workers)
 
     return decorator
 
