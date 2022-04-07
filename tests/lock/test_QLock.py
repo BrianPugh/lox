@@ -1,6 +1,7 @@
 from threading import Lock, Thread
+from time import sleep, time
+
 from lox import QLock
-from time import time, sleep
 
 SLEEP_TIME = 0.1
 
@@ -32,8 +33,8 @@ def test_1():
 
 def test_timeout():
     qlock = QLock()
-    assert(qlock.acquire())
-    assert(qlock.acquire(timeout=SLEEP_TIME) is False)
+    assert qlock.acquire()
+    assert qlock.acquire(timeout=SLEEP_TIME) is False
 
 
 def test_perf_qlock(benchmark):

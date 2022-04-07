@@ -1,7 +1,8 @@
-from threading import Lock, Thread
-from lox import LightSwitch
 from copy import copy
+from threading import Lock, Thread
 from time import sleep, time
+
+from lox import LightSwitch
 
 SLEEP_TIME = 0.01
 N_WORKERS = 5
@@ -26,32 +27,32 @@ def test_LightSwitch_1():
 
     with counting_lock:
         acquired_lock = common_lock.acquire(timeout=0)
-        assert(acquired_lock is False)
+        assert acquired_lock is False
     acquired_lock = common_lock.acquire(timeout=0)
-    assert(acquired_lock is True)
+    assert acquired_lock is True
     common_lock.release()
 
 
 def test_LightSwitch_len():
     global common_lock, counting_lock, resp_lock, resource
     common_setup()
-    assert(0 == len(counting_lock))
+    assert 0 == len(counting_lock)
     counting_lock.acquire()
-    assert(1 == len(counting_lock))
+    assert 1 == len(counting_lock)
     counting_lock.acquire()
-    assert(2 == len(counting_lock))
+    assert 2 == len(counting_lock)
     counting_lock.release()
-    assert(1 == len(counting_lock))
+    assert 1 == len(counting_lock)
     counting_lock.release()
-    assert(0 == len(counting_lock))
+    assert 0 == len(counting_lock)
 
 
 def test_LightSwitch_timeout():
     lock = Lock()
     ls = LightSwitch(lock)
     lock.acquire()
-    assert(ls.acquire(timeout=SLEEP_TIME) is False)
-    assert(ls.acquire(timeout=0) is False)
+    assert ls.acquire(timeout=SLEEP_TIME) is False
+    assert ls.acquire(timeout=0) is False
 
 
 def test_bathroom_example():
@@ -73,11 +74,12 @@ def test_bathroom_example():
     res = bathroom_example()
 
     for r, s in zip(res, sol):
-        assert(r == s)
+        assert r == s
 
 
 def bathroom_example():
-    """
+    """Bathroom analogy for light switch.
+
     Scenario:
         A janitor needs to clean a restroom, but is not allowed to enter until
         all people are out of the restroom. How do we implement this?
@@ -90,10 +92,10 @@ def bathroom_example():
 
     def janitor():
         with restroom_occupied:  # block until the restroom is no longer occupied
-            res.append('j_enter')
+            res.append("j_enter")
             print("(%0.3f s) Janitor  entered the restroom" % (time() - t_start,))
             sleep(sleep_time)  # clean the restroom
-            res.append('j_exit')
+            res.append("j_exit")
             print("(%0.3f s) Janitor  exited  the restroom" % (time() - t_start,))
 
     def people(id):
@@ -102,20 +104,32 @@ def bathroom_example():
             t_start = time()
         with restroom:  # block if a janitor is in the restroom
             res.append("p_%d_enter" % (id,))
-            print("(%0.3f s) Person %d entered the restroom" % (time() - t_start, id,))
+            print(
+                "(%0.3f s) Person %d entered the restroom"
+                % (
+                    time() - t_start,
+                    id,
+                )
+            )
             sleep(sleep_time)  # use the restroom
             res.append("p_%d_exit" % (id,))
-            print("(%0.3f s) Person %d exited  the restroom" % (time() - t_start, id,))
+            print(
+                "(%0.3f s) Person %d exited  the restroom"
+                % (
+                    time() - t_start,
+                    id,
+                )
+            )
 
     people_threads = [Thread(target=people, args=(i,)) for i in range(n_people)]
     janitor_thread = Thread(target=janitor)
 
     for i, person in enumerate(people_threads):
-        person.start()                 # Person i will now attempt to enter the restroom
-        sleep(sleep_time * 0.6)        # wait for 60% the time a person spends in the restroom
-        if i == 0:                       # While the first person is in the restroom...
-            janitor_thread.start()     # the janitor would like to enter. HOWEVER...
-            print("(%0.3f s) Janitor Dispatched" % (time()-t_start))
+        person.start()  # Person i will now attempt to enter the restroom
+        sleep(sleep_time * 0.6)  # wait for 60% the time a person spends in the restroom
+        if i == 0:  # While the first person is in the restroom...
+            janitor_thread.start()  # the janitor would like to enter. HOWEVER...
+            print("(%0.3f s) Janitor Dispatched" % (time() - t_start))
     # Wait for all threads to finish
     for t in people_threads:
         t.join()

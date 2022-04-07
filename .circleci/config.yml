@@ -95,7 +95,7 @@ jobs:
       - store_artifacts:
           path: htmlcov/
       - run:
-          name: Smoke Test Install 
+          name: Smoke Test Install
           command: |
             python --version
             sudo pip3 install lox
