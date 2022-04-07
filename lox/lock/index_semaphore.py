@@ -5,23 +5,23 @@
 .. moduleauthor:: Brian Pugh <bnp117@gmail.com>
 """
 
-from queue import Queue, Empty, Full
-from contextlib import contextmanager
 import logging as log
+from contextlib import contextmanager
+from queue import Empty, Full, Queue
 
-__all__ = ["IndexSemaphore", ]
+__all__ = [
+    "IndexSemaphore",
+]
 
 
 class IndexSemaphore:
-    """ ``BoundedSemaphore``-like object where acquires return an index from [0, val).
+    """``BoundedSemaphore``-like object where acquires return an index from [0, val).
 
-    Example usecase: thread acquiring a GPU.
-
-    Example:
+    Example acquiring a gpu resource from a thread:
         >>> sem = IndexSemaphore(4)
         >>> with sem() as index:
         >>>     print("Obtained resource %d" % (index,))
-        >>> 
+        >>>
         Obtained resource 0
     """
 
@@ -68,7 +68,8 @@ class IndexSemaphore:
                 self.release(index)
 
     def __len__(self):
-        """ 
+        """Return current blocked queue size.
+
         Returns
         -------
         int
@@ -97,7 +98,7 @@ class IndexSemaphore:
             return None
 
     def release(self, index):
-        """ Release resource at index.
+        """Release resource at index.
 
         Parameters
         ----------

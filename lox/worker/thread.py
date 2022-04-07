@@ -4,29 +4,29 @@
 
 Still allows the decorated function/method as normal.
 
-Example:
-
+Example
+-------
 .. doctest::
 
     >>> import lox
     >>>
-    >>> @lox.thread(4) # Will operate with a maximum of 4 threads
-    ... def foo(x,y):
-    ...     return x*y
-    >>> foo(3,4)
+    >>> @lox.thread(4)  # Will operate with a maximum of 4 threads
+    ... def foo(x, y):
+    ...     return x * y
+    ...
+    >>> foo(3, 4)
     12
     >>> for i in range(5):
-    ...     foo.scatter(i, i+1)
+    ...     foo.scatter(i, i + 1)
+    ...
     -ignore-
     >>> # foo is currently being executed in 4 threads
-    >>> results = foo.gather() # block until results are ready
-    >>> print(results) # Results are in the same order as scatter() calls
+    >>> results = foo.gather()  # block until results are ready
+    >>> print(results)  # Results are in the same order as scatter() calls
     [0, 2, 6, 12, 20]
 """
 
-from collections import namedtuple, deque
 import concurrent.futures
-import functools
 import threading
 
 try:
@@ -35,7 +35,9 @@ except ModuleNotFoundError:
     TQDM = None
 
 
-__all__ = ["thread", ]
+__all__ = [
+    "thread",
+]
 
 
 class ScatterGatherCallable:
@@ -75,9 +77,8 @@ class ScatterGatherCallable:
         Parameters
         ----------
         tqdm : tqdm.tqdm or bool
-            If ``bool`` and ``True``, will internally create and update a default tqdm object.
-            If ``tqdm``,
-            Initialized tqdm object to update with progress.
+            If ``True``, will internally create and update a default tqdm object.
+            If ``tqdm``, initialized tqdm object to update with progress.
         """
 
         pending = []
@@ -119,17 +120,17 @@ class ScatterGatherDescriptor:
         self._pending = []
 
         if n_workers:
-            self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=n_workers)
+            self._executor = concurrent.futures.ThreadPoolExecutor(
+                max_workers=n_workers
+            )
         else:
             # Disable threading; scatter calls are blocking; useful
             # for debugging multithreaded functions.
             self._executor = None
 
-        self._base_callable = ScatterGatherCallable(self._fn,
-                                                    None,
-                                                    self._executor,
-                                                    self._pending,
-                                                    self._pending_lock)
+        self._base_callable = ScatterGatherCallable(
+            self._fn, None, self._executor, self._pending, self._pending_lock
+        )
 
     def __call__(self, *args, **kwargs):
         """
@@ -144,7 +145,8 @@ class ScatterGatherDescriptor:
         return self._fn(*args, **kwargs)
 
     def __len__(self):
-        """
+        """Return length of unprocessed job queue.
+
         Returns
         -------
             Approximate length of unprocessed job queue.
@@ -158,8 +160,9 @@ class ScatterGatherDescriptor:
     def __get__(self, instance, owner=None):
         if instance is None:
             return self
-        return ScatterGatherCallable(self._fn, instance, self._executor,
-                                     self._pending, self._pending_lock)
+        return ScatterGatherCallable(
+            self._fn, instance, self._executor, self._pending, self._pending_lock
+        )
 
     def scatter(self, *args, **kwargs):
         """Enqueue a job to be processed by workers.
@@ -173,14 +176,13 @@ class ScatterGatherDescriptor:
         return self._base_callable.scatter(*args, **kwargs)
 
     def gather(self, *args, **kwargs):
-        """ Block and collect results from prior ``scatter`` calls.
-        """
+        """Block and collect results from prior ``scatter`` calls."""
 
         return self._base_callable.gather(*args, **kwargs)
 
 
 def thread(n_workers):
-    """ Decorator to execute a function in multiple threads.
+    """Decorate a function/method to execute in multiple threads.
 
     Example:
 
@@ -188,13 +190,15 @@ def thread(n_workers):
 
         >>> import lox
         >>>
-        >>> @lox.thread(4) # Will operate with a maximum of 4 threads
-        ... def foo(x,y):
-        ...     return x*y
-        >>> foo(3,4)
+        >>> @lox.thread(4)  # Will operate with a maximum of 4 threads
+        ... def foo(x, y):
+        ...     return x * y
+        ...
+        >>> foo(3, 4)
         12
         >>> for i in range(5):
-        ...     foo.scatter(i, i+1)
+        ...     foo.scatter(i, i + 1)
+        ...
         -ignore-
         >>> # foo is currently being executed in 4 threads
         >>> results = foo.gather()
@@ -207,13 +211,16 @@ def thread(n_workers):
     can be passed in as they normally would.
 
     .. doctest::
-        >>> @lox.thread(2) # Will operate with a maximum of 2 threads
-        ... def bar(x,y):
+        >>> @lox.thread(2)  # Will operate with a maximum of 2 threads
+        ... def bar(x, y):
         ...     return x + y
+        ...
 
-        >>>  for i in range(5):
-        ...    foo_res = foo.scatter(i, i+1)
-        ...    bar.scatter(foo_res, 10) # scatter will automatically unpack the results of foo
+        >>> for i in range(5):
+        ...     foo_res = foo.scatter(i, i + 1)
+        ...     bar.scatter(foo_res, 10)  # scatter will automatically
+        ...     # unpack the results of foo
+        ...
         >>>
         >>> results = bar.gather()
 
@@ -253,7 +260,7 @@ def thread(n_workers):
         -------
         list
             Results in the order that scatter was invoked.
-    """
+    """  # noqa: D214,D215,D410,D411
 
     # Support @thread with no arguments.
     if callable(n_workers):
@@ -265,6 +272,7 @@ def thread(n_workers):
     return decorator
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
+
     doctest.testmod()

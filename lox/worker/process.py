@@ -4,34 +4,34 @@
 
 Still allows the decorated function/method as normal.
 
-Example:
-
+Example
+-------
     .. doctest::
         :skipif: True
 
         >>> import lox
-        >>> 
-        >>> @lox.process(4) # Will operate with a maximum of 4 processes
-        ... def foo(x,y):
-        ...     return x*y
-        >>> foo(3,4)
+        >>>
+        >>> @lox.process(4)  # Will operate with a maximum of 4 processes
+        ... def foo(x, y):
+        ...     return x * y
+        ...
+        >>> foo(3, 4)
         12
         >>> for i in range(5):
-        ...     foo.scatter(i, i+1)
+        ...     foo.scatter(i, i + 1)
+        ...
         >>> # foo is currently being executed in 4 processes
         >>> results = foo.gather()
         >>> print(results)
         [0, 2, 6, 12, 20]
-
 """
 
 
-import concurrent.futures
-from collections import deque
-import pathos.multiprocessing as mp
-import threading
-import logging as log
 import os
+import threading
+from collections import deque
+
+import pathos.multiprocessing as mp
 
 try:
     from tqdm import tqdm as TQDM  # to avoid argument namespace collisions.
@@ -39,7 +39,9 @@ except ModuleNotFoundError:
     TQDM = None
 
 
-__all__ = ['process', ]
+__all__ = [
+    "process",
+]
 
 
 class ScatterGatherCallable:
@@ -73,7 +75,10 @@ class ScatterGatherCallable:
                     self._tqdm.update(1)
                 else:
                     self._tqdm_pre_update += 1
-        fut = self._executor[0].apply_async(self._fn, args=args, kwds=kwargs, callback=callback)
+
+        fut = self._executor[0].apply_async(
+            self._fn, args=args, kwds=kwargs, callback=callback
+        )
         self._pending.append(fut)
 
         return fut
@@ -106,11 +111,9 @@ class ScatterGatherDescriptor:
         self._n_workers = n_workers
         self._fn = fn
         self._pending = deque()
-        self._base_callable = ScatterGatherCallable(self._fn,
-                                                    None,
-                                                    self._executor,
-                                                    self._pending,
-                                                    self._n_workers)
+        self._base_callable = ScatterGatherCallable(
+            self._fn, None, self._executor, self._pending, self._n_workers
+        )
 
     def __call__(self, *args, **kwargs):
         """
@@ -125,7 +128,8 @@ class ScatterGatherDescriptor:
         return self._fn(*args, **kwargs)
 
     def __len__(self):
-        """ 
+        """Return length of unprocessed job queue.
+
         Returns
         -------
             Approximate length of unprocessed job queue.
@@ -141,8 +145,9 @@ class ScatterGatherDescriptor:
     def __get__(self, instance, owner=None):
         if instance is None:
             return self
-        return ScatterGatherCallable(self._fn, instance, self._executor,
-                                     self._pending, self._n_workers)
+        return ScatterGatherCallable(
+            self._fn, instance, self._executor, self._pending, self._n_workers
+        )
 
     def scatter(self, *args, **kwargs):
         """Enqueue a job to be processed by workers.
@@ -156,8 +161,7 @@ class ScatterGatherDescriptor:
         return self._base_callable.scatter(*args, **kwargs)
 
     def gather(self, *args, **kwargs):
-        """ Block and collect results from prior ``scatter`` calls.
-        """
+        """Block and collect results from prior ``scatter`` calls."""
 
         results = self._base_callable.gather(*args, **kwargs)
         self._executor = None
@@ -165,22 +169,24 @@ class ScatterGatherDescriptor:
 
 
 def process(n_workers):
-    """ Decorator to execute a function/method in multiple processes.
+    """Decorate a function/method to execute in multiple processes.
 
-    Example:
-
+    Example
+    -------
     .. doctest::
         :skipif: True
 
         >>> import lox
-        >>> 
-        >>> @lox.process(4) # Will operate with a maximum of 4 processes
-        ... def foo(x,y):
-        ...     return x*y
-        >>> foo(3,4)
+        >>>
+        >>> @lox.process(4)  # Will operate with a maximum of 4 processes
+        ... def foo(x, y):
+        ...     return x * y
+        ...
+        >>> foo(3, 4)
         12
         >>> for i in range(5):
-        ...     foo.scatter(i, i+1)
+        ...     foo.scatter(i, i + 1)
+        ...
         >>> # foo is currently being executed in 4 processes
         >>> results = foo.gather()
         >>> print(results)
@@ -200,13 +206,11 @@ def process(n_workers):
         -------
         Decorated function return type.
             Return of decorated function.
-
     __len__()
         Returns
         -------
         int
             job queue length.
-
     scatter( *args, **kwargs )
         Start a job executing ``func( *args, **kwargs )``.
         Workers are created and destroyed automatically.
@@ -215,7 +219,6 @@ def process(n_workers):
         -------
         int
             Solution's index into the results obtained via ``gather()``.
-
     gather()
         Block until all jobs called via ``scatter()`` are complete.
 
@@ -223,7 +226,7 @@ def process(n_workers):
         -------
         list
             Results in the order that scatter was invoked.
-    """
+    """  # noqa: D214,D215,D410,D411
 
     # Support @process with no arguments.
     if callable(n_workers):
@@ -235,6 +238,7 @@ def process(n_workers):
     return decorator
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
+
     doctest.testmod()

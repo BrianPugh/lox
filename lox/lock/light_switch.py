@@ -9,10 +9,13 @@ See https://w3.cs.jmu.edu/kirkpams/OpenCSF/Books/cs361/html/DesignAdv.html
 """
 
 import threading
-import pathos.multiprocessing as mp
 from time import time
 
-__all__ = ["LightSwitch", ]
+import pathos.multiprocessing as mp
+
+__all__ = [
+    "LightSwitch",
+]
 
 
 class LightSwitch:
@@ -58,8 +61,7 @@ class LightSwitch:
 
     @property
     def counter(self):
-        """int: Number of times the ``LightSwitch`` has been acquired without release.
-        """
+        """int: Times the ``LightSwitch`` has been acquired without release."""
 
         return self._counter
 
@@ -68,12 +70,12 @@ class LightSwitch:
         self._counter = counter
 
     def __enter__(self):
-        """ Acquire ``LightSwitch`` at context enter. """
+        """Acquire ``LightSwitch`` at context enter."""
 
         self.acquire()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """ Release ``LightSwitch`` at context exit. """
+        """Release ``LightSwitch`` at context exit."""
 
         self.release()
 

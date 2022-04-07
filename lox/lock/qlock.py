@@ -5,38 +5,42 @@
 .. moduleauthor:: Brian Pugh <bnp117@gmail.com>
 """
 
-from threading import Lock
 from collections import deque
+from threading import Lock
 
-__all__ = ["QLock", ]
+__all__ = [
+    "QLock",
+]
 
 
 class QLock:
-    """Lock that guarentees FIFO operation. Approximately 6x slower than a 
-    normal ``Lock()``.
+    """Lock that guarentees FIFO operation. ~6x slower than ``Lock()``.
 
     Modified from https://stackoverflow.com/a/19695878
     """
 
     def __init__(self):
-        """ Create a ``QLock`` object. """
+        """Create a ``QLock`` object."""
 
         self.queue = deque()
         self.lock = Lock()
         self.count = 0
 
     def __enter__(self):
-        """ Acquire ``QLock`` at context enter. """
+        """Acquire ``QLock`` at context enter."""
 
         self.acquire()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """ Release ``QLock`` at context exit. """
+        """Release ``QLock`` at context exit."""
 
         self.release()
 
-    def __len__(self,):
-        """ 
+    def __len__(
+        self,
+    ):
+        """Return number of tasks waiting to acquire.
+
         Returns
         -------
         int
@@ -47,7 +51,7 @@ class QLock:
 
     @property
     def locked(self):
-        """ Whether or not the ``QLock`` is acquired """
+        """Whether or not the ``QLock`` is acquired"""
 
         return self.count > 0
 
@@ -89,13 +93,12 @@ class QLock:
                         # lock must have been released between the timeout
                         # and self.lock.acquire()
                         pass
-                    finally:
-                        return False
+                    return False
             self.count += 1
         return True
 
     def release(self):
-        """ Release exclusive access to resource.
+        """Release exclusive access to resource.
 
         Raises
         ------

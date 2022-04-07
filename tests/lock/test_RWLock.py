@@ -1,8 +1,9 @@
 import threading
-from lox import RWLock
+from collections import deque
 from copy import copy
 from time import sleep, time
-from collections import deque
+
+from lox import RWLock
 
 SLEEP_TIME = 0.01
 N_WORKERS = 5
@@ -20,7 +21,7 @@ def common_setup():
 
 def common_create_workers(func, n, *args):
     threads = []
-    for i in range(n):
+    for _ in range(n):
         t = threading.Thread(target=func, args=args)
         threads.append(t)
 
@@ -33,7 +34,7 @@ def common_create_workers(func, n, *args):
 
 def read_worker():
     global rw_lock, resp
-    with rw_lock('r'):
+    with rw_lock("r"):
         local_copy = copy(resource)
         sleep(SLEEP_TIME)
 
@@ -43,7 +44,7 @@ def read_worker():
 
 def write_worker(val):
     global rw_lock, resource
-    with rw_lock('w'):
+    with rw_lock("w"):
         resource = val
     return
 
@@ -57,13 +58,13 @@ def test_RWLock_r():
     for t in threads:
         t.join()
     t_end = time()
-    t_diff = t_end-t_start
+    t_diff = t_end - t_start
 
-    assert(N_WORKERS > 2)
+    assert N_WORKERS > 2
     # for this to be true, readers have to access at same time (good)
-    assert(t_diff < (N_WORKERS-1)*SLEEP_TIME)
+    assert t_diff < (N_WORKERS - 1) * SLEEP_TIME
     for r in resp:
-        assert(r == resource)
+        assert r == resource
 
 
 def test_RWLock_w():
@@ -77,19 +78,21 @@ def test_RWLock_w():
     for t in threads_w1:
         t.join()
 
-    assert(resource == new_val)
+    assert resource == new_val
 
 
 def test_RWLock_rw():
     global rw_lock, resource, resp
     common_setup()
-    return
-    resource = 0
-    soln = [0, ]*N_WORKERS + [5, ]*N_WORKERS
 
-    threads_r1, t_start_r1 = common_create_workers(read_worker, N_WORKERS)
-    threads_w1, t_start_w1 = common_create_workers(write_worker, N_WORKERS, 5)
-    threads_r2, t_start_r2 = common_create_workers(read_worker, N_WORKERS)
+    resource = 0
+    soln = [0] * N_WORKERS + [
+        5,
+    ] * N_WORKERS
+
+    threads_r1, _t_start_r1 = common_create_workers(read_worker, N_WORKERS)
+    threads_w1, _t_start_w1 = common_create_workers(write_worker, N_WORKERS, 5)
+    threads_r2, _t_start_r2 = common_create_workers(read_worker, N_WORKERS)
 
     for t in threads_r1:
         t.join()
@@ -99,22 +102,22 @@ def test_RWLock_rw():
         t.join()
 
     for r, s in zip(resp, soln):
-        assert(r == s)
+        assert r == s
 
 
 def test_RWLock_timeout():
     lock = RWLock()
 
-    assert(lock.acquire('r', timeout=0.01) is True)
-    assert(lock.acquire('w', timeout=0.01) is False)
-    assert(lock.acquire('r', timeout=0.01) is True)
-    lock.release('r')
-    lock.release('r')
+    assert lock.acquire("r", timeout=0.01) is True
+    assert lock.acquire("w", timeout=0.01) is False
+    assert lock.acquire("r", timeout=0.01) is True
+    lock.release("r")
+    lock.release("r")
 
-    assert(lock.acquire('w', timeout=0.01) is True)
-    assert(lock.acquire('w', timeout=0.01) is False)
-    assert(lock.acquire('r', timeout=0.01) is False)
-    lock.release('w')
+    assert lock.acquire("w", timeout=0.01) is True
+    assert lock.acquire("w", timeout=0.01) is False
+    assert lock.acquire("r", timeout=0.01) is False
+    lock.release("w")
 
 
 def test_bathroom_example():
@@ -129,7 +132,7 @@ def test_bathroom_example():
     res = bathroom_example()[:4]
 
     for r, s in zip(res, sol):
-        assert(r == s)
+        assert r == s
 
 
 def bathroom_example():
@@ -144,32 +147,46 @@ def bathroom_example():
     sleep_time = 0.1
 
     def janitor():
-        with restroom('w'):  # block until the restroom is no longer occupied
-            res.append('j_enter')
+        with restroom("w"):  # block until the restroom is no longer occupied
+            res.append("j_enter")
             print("(%0.3f s) Janitor  entered the restroom" % (time() - t_start,))
             sleep(sleep_time)  # clean the restroom
-            res.append('j_exit')
+            res.append("j_exit")
             print("(%0.3f s) Janitor  exited  the restroom" % (time() - t_start,))
 
     def people(id):
         if id == 0:  # Get the starting time of execution for display purposes
             global t_start
             t_start = time()
-        with restroom('r'):  # block if a janitor is in the restroom
+        with restroom("r"):  # block if a janitor is in the restroom
             res.append("p_%d_enter" % (id,))
-            print("(%0.3f s) Person %d entered the restroom" % (time() - t_start, id,))
+            print(
+                "(%0.3f s) Person %d entered the restroom"
+                % (
+                    time() - t_start,
+                    id,
+                )
+            )
             sleep(sleep_time)  # use the restroom
             res.append("p_%d_exit" % (id,))
-            print("(%0.3f s) Person %d exited  the restroom" % (time() - t_start, id,))
+            print(
+                "(%0.3f s) Person %d exited  the restroom"
+                % (
+                    time() - t_start,
+                    id,
+                )
+            )
 
-    people_threads = [threading.Thread(target=people, args=(i,)) for i in range(n_people)]
+    people_threads = [
+        threading.Thread(target=people, args=(i,)) for i in range(n_people)
+    ]
     janitor_thread = threading.Thread(target=janitor)
 
     for i, person in enumerate(people_threads):
-        person.start()                 # Person i will now attempt to enter the restroom
-        sleep(sleep_time * 0.6)        # wait for 60% the time a person spends in the restroom
-        if i == 0:                       # While the first person is in the restroom...
-            janitor_thread.start()     # the janitor would like to enter. HOWEVER...
+        person.start()  # Person i will now attempt to enter the restroom
+        sleep(sleep_time * 0.6)  # wait for 60% the time a person spends in the restroom
+        if i == 0:  # While the first person is in the restroom...
+            janitor_thread.start()  # the janitor would like to enter. HOWEVER...
             # A new person (until all n_people are done) enters every 0.5 seconds.
     # Wait for all threads to finish
     for t in people_threads:
@@ -192,13 +209,13 @@ def bathroom_example():
     (0.303 s) Person 3 exited  the restroom
     (0.343 s) Person 4 exited  the restroom
     """
-    # While Person 0 is in the restroom, the Janitor is waiting to enter (at around 0.5000 s).
+    # While Person 0 is in the restroom, Janitor is waiting to enter (at ~0.500 s).
     # While the Janitor is waiting, he doesn't let anyone else into the room.
     # After Person 0, leaves the room, the Janitor enters.
     # After cleaning, the Janitor leaves at the 2.000 second mark.
     # Ever since the janitor was waiting (at 0.500 s), Person 1, Person 2,
     # Person 3, and Person 4 have been lining up to enter.
-    # Now that the Janitor left the restroom, all the waiting people go in at the same time.
+    # Since the Janitor left the restroom, all waiting people go in at the same time.
     return res
 
 

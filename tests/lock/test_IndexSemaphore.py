@@ -1,7 +1,10 @@
-from threading import Lock, Thread
-from lox import IndexSemaphore
-from time import time, sleep
 from collections import deque
+from threading import Lock, Thread
+from time import sleep, time
+
+import pytest
+
+from lox import IndexSemaphore
 
 SLEEP_TIME = 0.01
 n_resource = 5
@@ -34,7 +37,7 @@ def test_multithread_args():
         t.join()
     for r in resp:
         assert r
-    assert(len(resp) == n_threads)
+    assert len(resp) == n_threads
 
 
 def test_multithread_no_args():
@@ -63,7 +66,7 @@ def test_multithread_no_args():
         t.join()
     for r in resp:
         assert r
-    assert(len(resp) == n_threads)
+    assert len(resp) == n_threads
 
 
 def test_multithread_context_args():
@@ -90,8 +93,8 @@ def test_multithread_context_args():
     for t in threads:
         t.join()
     for r in resp:
-        assert(r)
-    assert(len(resp) == n_threads)
+        assert r
+    assert len(resp) == n_threads
 
 
 def test_multithread_context_no_args():
@@ -119,20 +122,17 @@ def test_multithread_context_no_args():
         t.join()
     for r in resp:
         assert r
-    assert(len(resp) == n_threads)
+    assert len(resp) == n_threads
 
 
 def test_invalid_constructor():
-    try:
+    with pytest.raises(ValueError):
         IndexSemaphore(0)
-        assert(False)
-    except ValueError:
-        assert(True)
 
 
 def test_timeout():
     sem = IndexSemaphore(1)
     with sem(timeout=None) as index1:
-        assert(index1 == 0)
+        assert index1 == 0
         with sem(timeout=0.1) as index2:
             assert index2 is None

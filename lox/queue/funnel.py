@@ -6,31 +6,29 @@ Wait on a queue until a set of inputs are ready.
 """
 
 
-import queue
-from collections import deque
-import threading
 import logging as log
+import queue
+import threading
+from collections import deque
 
-__all__ = ["Funnel", "FunnelPutError", "FunnelPutTopError", ]
+__all__ = [
+    "Funnel",
+    "FunnelPutError",
+    "FunnelPutTopError",
+]
 
 
 class FunnelPutError(Exception):
-    """ Cannot ``put`` to a top/main Funnel object;
+    """Cannot ``put`` to a top/main Funnel object;
     can only ``put`` to subscribers.
     """
 
-    pass
-
 
 class FunnelPutTopError(Exception):
-    """ Can only put onto subscribers, not the top/main ``Funnel``.
-    """
-
-    pass
+    """Can only put onto subscribers, not the top/main ``Funnel``."""
 
 
 class FunnelElement:
-
     def __init__(self, item=None, complete=False):
         """
         Parameters
@@ -50,7 +48,7 @@ class FunnelElement:
 
 
 class Funnel:
-    """ Wait on many queues.
+    """Wait on many queues.
 
     .. doctest::
 
@@ -58,13 +56,14 @@ class Funnel:
         >>> sub_1 = funnel.subscribe()
         >>> sub_2 = funnel.subscribe()
 
-        >>> sub_1.put('foo', 'job_id')
+        >>> sub_1.put("foo", "job_id")
         >>> try:
         ...     res = funnel.get(timeout=0.01)
         ... except queue.Empty:
         ...     print("Timed Out")
+        ...
         Timed Out
-        >>> sub_2.put('bar', 'job_id')
+        >>> sub_2.put("bar", "job_id")
         >>> res = funnel.get()
         >>> print(len(res))
         3
@@ -80,18 +79,17 @@ class Funnel:
     """
 
     def __init__(self):
-        """ Create a Funnel Object
-        """
+        """Create a Funnel Object"""
 
         self.lock = threading.RLock()
         self.index = -1  # Index into list of solutions
         self.subscribers = deque()
         self.d = {}
-        self.q = queue.Queue()          # Object that complete sets are placed on.
+        self.q = queue.Queue()  # Object that complete sets are placed on.
 
     @classmethod
     def _clone(cls, funnel):
-        """ Create a new ``Funnel`` object that shares subscribers and resources
+        """Create a new ``Funnel`` object that shares subscribers and resources
         with an existing ``Funnel``.
 
         Only difference is it's index is 1 higher than the funnel's last subscriber.
@@ -120,8 +118,10 @@ class Funnel:
 
         return new_funnel
 
-    def __len__(self,):
-        """ Gets number of input queues.
+    def __len__(
+        self,
+    ):
+        """Return number of input queues.
 
         Returns
         -------
@@ -131,8 +131,10 @@ class Funnel:
 
         return len(self.subscribers)
 
-    def subscribe(self,):
-        """ Create a new Funnel for data to be ``put`` on.
+    def subscribe(
+        self,
+    ):
+        """Create a new Funnel for data to be ``put`` on.
 
         Returns
         -------
@@ -143,7 +145,13 @@ class Funnel:
         new_funnel = Funnel._clone(self)
         return new_funnel
 
-    def put(self, item, jid, blocking=True, timeout=-1, ):
+    def put(
+        self,
+        item,
+        jid,
+        blocking=True,
+        timeout=-1,
+    ):
         """
         Parameters
         ----------
@@ -191,15 +199,17 @@ class Funnel:
 
         # Add item to queue if all subscribers are accounted for.
         if all([elem.complete for elem in self.d[jid]]):
-            log.debug("JID \"%s\" complete; putting onto queue %s" % (str(jid), str(self.q)))
-            self.q.put(tuple([jid, ] + [elem.item for elem in self.d[jid]]))
+            log.debug(
+                'JID "%s" complete; putting onto queue %s' % (str(jid), str(self.q))
+            )
+            self.q.put(tuple([jid] + [elem.item for elem in self.d[jid]]))
             del self.d[jid]
 
         self.lock.release()
         return True
 
     def get(self, block=True, timeout=None, return_jid=True):
-        """ Get from the receive queue. Will return the contents of each
+        """Get from the receive queue. Will return the contents of each
         input queue in the order subscribed as a tuple
 
         Parameters
