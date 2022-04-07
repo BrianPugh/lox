@@ -12,6 +12,7 @@ import lox.worker
 from lox.worker.process import process
 from lox.worker.thread import thread
 
+from .debug import *
 from .exceptions import *
 from .lock import *
 from .queue import *
