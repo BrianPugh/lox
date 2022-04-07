@@ -2,10 +2,14 @@
 History
 =======
 
+0.11.0 (2022-04-07)
+-------------------
+* Set number of workers to 0 (in thread execution) if the environment variable ``LOX_DEBUG`` is set to a true-like value (``true``, ``1``, etc.). Makes it easier to set breakpoints in multithreaded code without having to manually edit the decorator.
+
 0.10.0 (2021-12-18)
 -------------------
 * Remove dependency pinning.
-* Allow `@lox.thread(0)`. This will execute `scatter` calls in parent thread.
+* Allow ``@lox.thread(0)``. This will execute ``scatter`` calls in parent thread.
   Useful for debugging breakpoints in parallelized code.
 
 0.9.0 (2020-11-25)
