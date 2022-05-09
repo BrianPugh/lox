@@ -131,7 +131,7 @@ Progress Bar Support (tqdm)
     ...     sleep(multiplier * random())
     ...
     >>> for i in range(10):
-    >>> foo.scatter(i)
+    >>>     foo.scatter(i)
     >>> results = foo.gather(tqdm=True)
     90%|████████████████████████████████▌        | 9/10 [00:03<00:00,  1.32it/s]
     100%|███████████████████████████████████████| 10/10 [00:06<00:00,  1.46s/it]
