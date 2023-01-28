@@ -44,9 +44,9 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   installation
-   modules
+   Installation
    examples
+   api
 
 .. toctree::
    :maxdepth: 1
@@ -54,7 +54,6 @@ Contents
    FAQ
    contributing
    authors
-   history
 
 
 Indices and tables
