@@ -5,7 +5,6 @@
 Wait on a queue until a set of inputs are ready.
 """
 
-
 import logging as log
 import queue
 import threading
@@ -198,7 +197,7 @@ class Funnel:
         self.d[jid][self.index].set(item)
 
         # Add item to queue if all subscribers are accounted for.
-        if all([elem.complete for elem in self.d[jid]]):
+        if all(elem.complete for elem in self.d[jid]):
             log.debug(
                 'JID "%s" complete; putting onto queue %s' % (str(jid), str(self.q))
             )

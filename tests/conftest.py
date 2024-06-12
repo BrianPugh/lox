@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# content of conftest.py
-
 import pytest
 
 

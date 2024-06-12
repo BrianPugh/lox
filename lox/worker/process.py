@@ -26,10 +26,10 @@ Example
         [0, 2, 6, 12, 20]
 """
 
-
 import os
 import threading
 from collections import deque
+from typing import Callable
 
 import pathos.multiprocessing as mp
 
@@ -170,7 +170,7 @@ class ScatterGatherDescriptor:
         return results
 
 
-def process(n_workers):
+def process(n_workers) -> Callable[[Callable], ScatterGatherDescriptor]:
     """Decorate a function/method to execute in multiple processes.
 
     Example
@@ -234,7 +234,7 @@ def process(n_workers):
     if callable(n_workers):
         return process(os.cpu_count())(n_workers)
 
-    def decorator(fn):
+    def decorator(fn: Callable) -> ScatterGatherDescriptor:
         return ScatterGatherDescriptor(fn, 0 if LOX_DEBUG else n_workers)
 
     return decorator
