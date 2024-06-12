@@ -28,6 +28,7 @@ Example
 
 import concurrent.futures
 import threading
+from typing import Callable
 
 from ..debug import LOX_DEBUG
 
@@ -183,7 +184,7 @@ class ScatterGatherDescriptor:
         return self._base_callable.gather(*args, **kwargs)
 
 
-def thread(n_workers):
+def thread(n_workers) -> Callable[[Callable], ScatterGatherDescriptor]:
     """Decorate a function/method to execute in multiple threads.
 
     Example:
@@ -268,7 +269,7 @@ def thread(n_workers):
     if callable(n_workers):
         return thread(50)(n_workers)
 
-    def decorator(fn):
+    def decorator(fn: Callable) -> ScatterGatherDescriptor:
         return ScatterGatherDescriptor(fn, 0 if LOX_DEBUG else n_workers)
 
     return decorator
