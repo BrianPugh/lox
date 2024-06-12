@@ -42,7 +42,6 @@ jobs:
                   TWINE_USERNAME: __token__
                   TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
               run: |
-                  python setup.py verify
                   python -m twine upload dist/*
 
             - uses: actions/upload-artifact@v4

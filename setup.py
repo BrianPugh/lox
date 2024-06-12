@@ -4,27 +4,7 @@ import sys
 from setuptools import find_packages, setup
 from setuptools.command.install import install
 
-version = "0.11.0"
-
-
-class VerifyVersionCommand(install):
-    """Custom command to verify that the git tag matches our version
-
-    https://circleci.com/blog/continuously-deploying-python-packages-to-pypi-with-circleci/
-    """
-
-    description = "verify that the git tag matches our version"
-
-    def run(self):
-        tag = os.getenv("CIRCLE_TAG")
-
-        if tag != "v" + version:
-            info = (
-                'Git tag: "{0}" does not match the version of this app: "{1}"'.format(
-                    tag, version
-                )
-            )
-            sys.exit(info)
+version = "0.12.0"
 
 
 with open("README.rst") as readme_file:
@@ -78,7 +58,4 @@ setup(
     url="https://github.com/BrianPugh/lox",
     version=version,
     zip_safe=False,
-    cmdclass={
-        "verify": VerifyVersionCommand,
-    },
 )
