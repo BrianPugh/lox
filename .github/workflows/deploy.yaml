@@ -1,0 +1,53 @@
+name: Build package and push to PyPi
+
+on:
+    workflow_dispatch:
+    push:
+        tags:
+            - "v*.*.*"
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # Includes getting tags
+
+            - name: Cache $HOME/.local # Significantly speeds up Poetry Install
+              uses: actions/cache@v4
+              with:
+                  path: ~/.local
+                  key: dotlocal-${{ runner.os }}-${{ hashFiles('.github/workflows/deploy.yml') }}
+
+            - name: Set up python 3.12
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.12"
+
+            - name: Build Package
+              run: |
+                  python -m pip install --upgrade pip
+                  make dev
+                  python setup.py verify
+                  make dev
+                  make package
+
+            - name: Run tests
+              run: |
+                  python -m pytest
+
+            - name: Publish to PyPI
+              if: github.event_name != 'workflow_dispatch'
+              env:
+                  TWINE_USERNAME: __token__
+                  TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+              run: |
+                  python -m twine upload dist/*
+
+            - uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: dist
+                  path: dist/
