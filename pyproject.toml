@@ -27,6 +27,7 @@ generate-setup-file = false
 [tool.poetry.dependencies]
 # Be as loose as possible if writing a library.
 python = "^3.8"
+pathos = ">=0.2.3"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = ">=6.0.0"
