@@ -42,6 +42,7 @@ pytest = ">=7.1.2"
 pytest-cov = ">=3.0.0"
 pytest-mock = ">=3.7.0"
 pytest-benchmark = ">=4.0.0"
+tqdm = ">=4.0.0"
 
 [tool.poetry.group.debug]
 optional = true
