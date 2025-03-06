@@ -55,13 +55,14 @@ jobs:
         uses: actions/cache@v4
         id: cached-poetry
         with:
-          version: 1.8.5
           path: ${{ env.POETRY_HOME }}
           key: poetry-cache-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('.github/workflows/tests.yaml') }}
 
       - name: Install poetry
         uses: snok/install-poetry@v1
         if: steps.cached-poetry.outputs.cache-hit != 'true'
+        with:
+          version: 1.8.5
 
       - name: Add Poetry to PATH # Needs to be separate from install-poetry because cache.
         run: |
