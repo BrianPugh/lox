@@ -1,8 +1,7 @@
 from random import random
-from time import sleep, time
+from time import sleep
 
 import pytest
-from tqdm import tqdm
 
 import lox
 
