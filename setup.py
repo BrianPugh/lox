@@ -4,7 +4,7 @@ import sys
 from setuptools import find_packages, setup
 from setuptools.command.install import install
 
-version = "0.12.0"
+version = "0.13.0"
 
 
 with open("README.rst") as readme_file:
