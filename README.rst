@@ -4,9 +4,6 @@
 .. image:: https://img.shields.io/pypi/v/lox.svg
         :target: https://pypi.python.org/pypi/lox
 
-.. image:: https://circleci.com/gh/BrianPugh/lox.svg?style=svg
-        :target: https://circleci.com/gh/BrianPugh/lox
-
 .. image:: https://readthedocs.org/projects/lox/badge/?version=latest
         :target: https://lox.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status

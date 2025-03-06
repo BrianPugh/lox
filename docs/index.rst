@@ -54,7 +54,6 @@ Contents
    FAQ
    contributing
    authors
-   history
 
 
 Indices and tables
