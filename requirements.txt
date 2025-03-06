@@ -1,2 +1,1 @@
 pathos
-sphinx_rtd_theme
