@@ -93,7 +93,7 @@ release = lox.__version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -121,7 +121,7 @@ html_theme = "sphinx_rtd_theme"
 html_theme_options = {
     "canonical_url": "",
     "logo_only": True,
-    "display_version": False,
+    "version_selector": True,
     "prev_next_buttons_location": "bottom",
     "style_external_links": False,
     "style_nav_header_background": "white",
