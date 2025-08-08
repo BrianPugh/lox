@@ -17,17 +17,6 @@ readme = readme.replace(
 with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
-with open("requirements.txt") as f:
-    requirements = f.read().splitlines()
-
-setup_requirements = [
-    "pytest-runner",
-]
-
-test_requirements = [
-    "pytest",
-]
-
 setup(
     author="Brian Pugh",
     author_email="bnp117@gmail.com",
@@ -44,7 +33,10 @@ setup(
         "Programming Language :: Python :: 3.12",
     ],
     description="Threading and Multiprocessing for every project.",
-    install_requires=requirements,
+    install_requires=[],
+    extras_require={
+        "multiprocessing": ["pathos"],
+    },
     license="MIT license",
     long_description=readme + "\n\n" + history,
     long_description_content_type="text/x-rst",
@@ -52,9 +44,7 @@ setup(
     keywords="lox",
     name="lox",
     packages=find_packages(include=["lox"]),
-    setup_requires=setup_requirements,
     test_suite="tests",
-    tests_require=test_requirements,
     url="https://github.com/BrianPugh/lox",
     version=version,
     zip_safe=False,

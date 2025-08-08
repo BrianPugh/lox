@@ -4,7 +4,6 @@ from random import random
 from time import sleep, time
 
 import pytest
-from tqdm import tqdm
 
 import lox
 

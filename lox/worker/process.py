@@ -31,7 +31,13 @@ import threading
 from collections import deque
 from typing import Callable
 
-import pathos.multiprocessing as mp
+try:
+    import pathos.multiprocessing as mp
+
+    _PATHOS_AVAILABLE = True
+except ImportError:
+    mp = None
+    _PATHOS_AVAILABLE = False
 
 from ..debug import LOX_DEBUG
 
@@ -63,6 +69,12 @@ class ScatterGatherCallable:
         return self._fn(*args, **kwargs)
 
     def scatter(self, *args, **kwargs):
+        if not _PATHOS_AVAILABLE:
+            raise ValueError(
+                "pathos is not installed. "
+                "Install the full package with: pip install lox[multiprocessing]"
+            )
+
         if self._instance is not None:
             args = (self._instance,) + args
 
@@ -86,6 +98,12 @@ class ScatterGatherCallable:
         return fut
 
     def gather(self, *, tqdm=None):
+        if not _PATHOS_AVAILABLE:
+            raise ValueError(
+                "pathos is not installed. "
+                "Install the full package with: pip install lox[multiprocessing]"
+            )
+
         if tqdm is not None:
             if TQDM is None:
                 raise ModuleNotFoundError("No module named 'tqdm'")
@@ -159,11 +177,21 @@ class ScatterGatherDescriptor:
         ------
         concurrent.futures.Future
         """
+        if not _PATHOS_AVAILABLE:
+            raise ValueError(
+                "pathos is not installed. "
+                "Install the full package with: pip install lox[multiprocessing]"
+            )
 
         return self._base_callable.scatter(*args, **kwargs)
 
     def gather(self, *args, **kwargs):
         """Block and collect results from prior ``scatter`` calls."""
+        if not _PATHOS_AVAILABLE:
+            raise ValueError(
+                "pathos is not installed. "
+                "Install the full package with: pip install lox[multiprocessing]"
+            )
 
         results = self._base_callable.gather(*args, **kwargs)
         self._executor = None
