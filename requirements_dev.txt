@@ -8,6 +8,7 @@ pytest-benchmark
 pytest-mock
 pytest-runner
 Sphinx
+sphinx_rtd_theme
 tox
 tqdm
 twine
