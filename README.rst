@@ -28,6 +28,10 @@ Installation
 
     pip3 install --user lox
 
+For multiprocessing support, install with the optional extra:
+
+    pip3 install --user 'lox[multiprocessing]'
+
 Features
 --------
 

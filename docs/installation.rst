@@ -14,6 +14,12 @@ To install lox, run this command in your terminal:
 
     $ pip install lox
 
+For multiprocessing support, install with the optional extra:
+
+.. code-block:: console
+
+    $ pip install 'lox[multiprocessing]'
+
 This is the preferred method to install lox, as it will always install the most recent stable release.
 
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
