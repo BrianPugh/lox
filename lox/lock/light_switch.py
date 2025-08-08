@@ -11,7 +11,13 @@ See https://w3.cs.jmu.edu/kirkpams/OpenCSF/Books/cs361/html/DesignAdv.html
 import threading
 from time import time
 
-import pathos.multiprocessing as mp
+try:
+    import pathos.multiprocessing as mp
+
+    _PATHOS_AVAILABLE = True
+except ImportError:
+    mp = None
+    _PATHOS_AVAILABLE = False
 
 __all__ = [
     "LightSwitch",
@@ -39,6 +45,11 @@ class LightSwitch:
         """
 
         if multiprocessing:
+            if not _PATHOS_AVAILABLE:
+                raise RuntimeError(
+                    "pathos is not installed. "
+                    "Install the full package with: pip install lox[multiprocessing]"
+                )
             self._library = mp
         else:
             self._library = threading

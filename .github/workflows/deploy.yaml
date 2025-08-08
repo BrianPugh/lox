@@ -15,12 +15,6 @@ jobs:
               with:
                   fetch-depth: 0 # Includes getting tags
 
-            - name: Cache $HOME/.local # Significantly speeds up Poetry Install
-              uses: actions/cache@v4
-              with:
-                  path: ~/.local
-                  key: dotlocal-${{ runner.os }}-${{ hashFiles('.github/workflows/deploy.yml') }}
-
             - name: Set up python 3.11
               uses: actions/setup-python@v5
               with:

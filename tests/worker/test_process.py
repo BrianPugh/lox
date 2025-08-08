@@ -2,7 +2,6 @@ from random import random
 from time import sleep, time
 
 import pytest
-from tqdm import tqdm
 
 import lox
 
@@ -10,6 +9,7 @@ SLEEP_TIME = 0.01
 N_WORKERS = 2
 
 
+@pytest.mark.requires_pathos
 def test_basic_args():
     in_x = [
         1,
@@ -62,6 +62,7 @@ def test_basic_args():
             assert (x * y) == r
 
 
+@pytest.mark.requires_pathos
 def test_basic_noargs():
     in_x = [
         1,
@@ -129,6 +130,7 @@ class Class1:
         return x * y + self.z
 
 
+@pytest.mark.requires_pathos
 def test_method_1():
     in_x = [
         1,
@@ -188,6 +190,7 @@ def mock_tqdm(mocker):
     return mocker.patch("lox.worker.process.TQDM")
 
 
+@pytest.mark.requires_pathos
 def test_tqdm_bool(mock_tqdm):
 
     in_x = [
@@ -236,6 +239,7 @@ def test_tqdm_bool(mock_tqdm):
         assert (x * y) == r
 
 
+@pytest.mark.requires_pathos
 def test_tqdm_tqdm(mocker):
     in_x = [
         1,
@@ -288,6 +292,7 @@ def test_tqdm_tqdm(mocker):
 
 
 @pytest.mark.visual
+@pytest.mark.requires_pathos
 def test_tqdm_bool_visual():
     """Primarily for visually asserting our tqdm mocks are correct."""
 
