@@ -34,6 +34,14 @@ jobs:
         run: |
           pre-commit run --all-files
 
-      - name: Test with pytest
+      - name: Test without pathos
         run: |
-          python -m pytest
+          python -m pytest -m "not requires_pathos"
+
+      - name: Install pathos
+        run: |
+          pip install -e ".[multiprocessing]"
+
+      - name: Test with pathos
+        run: |
+          python -m pytest -m "requires_pathos"
